@@ -881,8 +881,10 @@
             return originalRenderMasterData();
         };
 
-        function renderSettings() {
+                function renderSettings() {
             const s = window.appState.settings;
+            const defaultNote = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\nPakaian bersih hati gembira';
+            
             return `
                 <div class="clay-card p-5 space-y-4 mb-6">
                     <h3 class="font-bold text-gray-800 text-base border-b border-gray-200 pb-2">🏪 Profil Outlet</h3>
@@ -925,6 +927,11 @@
                         </label>
                     </div>
 
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Catatan Kaki (Pesan Penutup Nota)</label>
+                        <textarea id="set-receipt-note" class="clay-input text-sm" rows="3" oninput="updateSettingsLive()">${defaultNote}</textarea>
+                    </div>
+
                     <div class="pt-2">
                         <label class="block text-xs font-bold text-gray-600 mb-2">👁️ Live Preview Nota Struk:</label>
                         <div id="settings-receipt-preview" class="bg-white p-4 rounded-xl border border-dashed border-gray-400 font-mono text-[11px] text-gray-800 shadow-inner">
@@ -947,7 +954,10 @@
             const hideOutlet = document.getElementById('set-hide-outlet').checked;
             const hideLogo = document.getElementById('set-hide-logo').checked;
             const showTrx = document.getElementById('set-show-trx').checked;
-            const showService = document.getElementById('set-show-service').checked;
+            
+            const noteInput = document.getElementById('set-receipt-note');
+            const noteText = noteInput ? noteInput.value : 'Terima Kasih';
+            const noteHtml = noteText.split('\n').map(line => `<p style="margin:0;">${line}</p>`).join('');
 
             let html = '';
             if (!hideLogo) html += `<div style="text-align: center; font-size: 16px; margin-bottom: 2px;">🧺</div>`;
@@ -974,7 +984,7 @@
                     <span style="float: right;">${formatRp(12000)}</span>
                 </div>
                 <div style="text-align: center; font-size: 10px; margin-top: 8px;">
-                    <p style="margin:0;">Terima Kasih</p>
+                    ${noteHtml}
                 </div>
             `;
             previewContainer.innerHTML = html;
@@ -1000,6 +1010,7 @@
             const hideLogo = document.getElementById('set-hide-logo').checked;
             const showTrx = document.getElementById('set-show-trx').checked;
             const showService = document.getElementById('set-show-service').checked;
+            const note = document.getElementById('set-receipt-note').value;
 
             window.appState.settings = {
                 outletName: name,
@@ -1008,12 +1019,15 @@
                 hideOutletName: hideOutlet,
                 hideLogo: hideLogo,
                 showTrxNumber: showTrx,
-                showServiceDetail: showService
+                showServiceDetail: showService,
+                receiptNote: note
             };
 
             localStorage.setItem('laundry_settings', JSON.stringify(window.appState.settings));
             showToast("Pengaturan Disimpan!", "✅");
         };
+        
+                            
 
         function renderReports() {
             const trxs = window.appState.transactions;

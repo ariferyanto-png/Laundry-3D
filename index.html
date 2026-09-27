@@ -248,24 +248,8 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'laundry-3d-app';
-        let firebaseConfig = null;
-        if (typeof __firebase_config !== 'undefined') {
-            firebaseConfig = JSON.parse(__firebase_config);
-        } else {
-            firebaseConfig = { apiKey: "mock", projectId: "mock" };
-        }
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        let currentUser = null;
-
+    <script>
+        // State Awal Aplikasi
         window.appState = {
             transactions: [],
             services: [],
@@ -284,12 +268,10 @@
             }
         };
 
-        // Load settings from localStorage if available
+        // Memuat pengaturan dari memori HP
         const savedSettings = localStorage.getItem('laundry_settings');
         if (savedSettings) {
-            try {
-                window.appState.settings = JSON.parse(savedSettings);
-            } catch(e) {}
+            try { window.appState.settings = JSON.parse(savedSettings); } catch(e) {}
         }
 
         const STATUS = {
@@ -300,132 +282,89 @@
             BATAL: 'Batal'
         };
 
+        // Fungsi menyimpan data ke memori lokal HP (tanpa internet)
+        function saveToLocal(colName) {
+            localStorage.setItem('laundry_' + colName, JSON.stringify(window.appState[colName]));
+        }
+
+        // Fungsi menarik data dari memori lokal HP
+        function loadFromLocal(colName) {
+            const data = localStorage.getItem('laundry_' + colName);
+            if (data) {
+                try { window.appState[colName] = JSON.parse(data); } catch(e) {}
+            }
+        }
+
+        // Jalankan penarikan data saat aplikasi pertama kali dibuka
+        ['transactions', 'services', 'customers', 'employees'].forEach(loadFromLocal);
+
+        // Mesin database lokal (Menggantikan Firebase)
         window.dbActions = {
-            addTransaction: async (data) => await addData('transactions', data),
-            updateTransaction: async (id, data) => await updateData('transactions', id, data),
-            addService: async (data) => await addData('services', data),
-            updateService: async (id, data) => await updateData('services', id, data),
-            deleteService: async (id) => await deleteData('services', id),
-            addCustomer: async (data) => await addData('customers', data),
-            updateCustomer: async (id, data) => await updateData('customers', id, data),
-            deleteCustomer: async (id) => await deleteData('customers', id),
-            addEmployee: async (data) => await addData('employees', data),
-            updateEmployee: async (id, data) => await updateData('employees', id, data),
-            deleteEmployee: async (id) => await deleteData('employees', id),
+            addTransaction: async (data) => { 
+                data.id = Date.now().toString(); 
+                data.createdAt = Date.now(); 
+                window.appState.transactions.unshift(data); 
+                saveToLocal('transactions'); 
+                return data.id; 
+            },
+            updateTransaction: async (id, data) => { 
+                const idx = window.appState.transactions.findIndex(t => t.id === id); 
+                if(idx > -1) { 
+                    window.appState.transactions[idx] = {...window.appState.transactions[idx], ...data, updatedAt: Date.now()}; 
+                    saveToLocal('transactions'); 
+                } 
+            },
+            addService: async (data) => { 
+                data.id = Date.now().toString(); 
+                window.appState.services.push(data); 
+                saveToLocal('services'); 
+            },
+            updateService: async (id, data) => { 
+                const idx = window.appState.services.findIndex(s => s.id === id); 
+                if(idx > -1) { 
+                    window.appState.services[idx] = {...window.appState.services[idx], ...data}; 
+                    saveToLocal('services'); 
+                } 
+            },
+            deleteService: async (id) => { 
+                window.appState.services = window.appState.services.filter(s => s.id !== id); 
+                saveToLocal('services'); 
+            },
+            addCustomer: async (data) => { 
+                data.id = Date.now().toString(); 
+                window.appState.customers.push(data); 
+                saveToLocal('customers'); 
+            },
+            updateCustomer: async (id, data) => { 
+                const idx = window.appState.customers.findIndex(c => c.id === id); 
+                if(idx > -1) { 
+                    window.appState.customers[idx] = {...window.appState.customers[idx], ...data}; 
+                    saveToLocal('customers'); 
+                } 
+            },
+            deleteCustomer: async (id) => { 
+                window.appState.customers = window.appState.customers.filter(c => c.id !== id); 
+                saveToLocal('customers'); 
+            },
+            addEmployee: async (data) => { 
+                data.id = Date.now().toString(); 
+                window.appState.employees.push(data); 
+                saveToLocal('employees'); 
+            },
+            updateEmployee: async (id, data) => { 
+                const idx = window.appState.employees.findIndex(e => e.id === id); 
+                if(idx > -1) { 
+                    window.appState.employees[idx] = {...window.appState.employees[idx], ...data}; 
+                    saveToLocal('employees'); 
+                } 
+            },
+            deleteEmployee: async (id) => { 
+                window.appState.employees = window.appState.employees.filter(e => e.id !== id); 
+                saveToLocal('employees'); 
+            },
         };
-
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth error:", error);
-                showToast("Gagal koneksi ke cloud", "❌");
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                setupRealtimeListeners();
-            }
-        });
-
-        initAuth();
-
-        function setupRealtimeListeners() {
-            if (!currentUser) return;
-
-            const collections = ['transactions', 'services', 'customers', 'employees'];
-            
-            collections.forEach(colName => {
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', colName));
-                onSnapshot(q, (snapshot) => {
-                    const data = [];
-                    snapshot.forEach((doc) => {
-                        data.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    window.appState[colName] = data;
-                    
-                    const modal = document.getElementById('form-modal');
-                    const confirmModal = document.getElementById('confirm-modal');
-                    const isModalOpen = (modal && !modal.classList.contains('hidden')) || (confirmModal && !confirmModal.classList.contains('hidden'));
-
-                    if (window.appState.currentView === 'pos') {
-                        if (colName === 'customers') {
-                            const custSelect = document.getElementById('pos-customer');
-                            if (custSelect) {
-                                const currentVal = custSelect.value;
-                                custSelect.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' + data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-                                if (currentVal && data.find(c => c.id === currentVal)) {
-                                    custSelect.value = currentVal;
-                                } else if (data.length > 0 && !currentVal) {
-                                    custSelect.value = data[0].id;
-                                }
-                            }
-                        } else if (colName === 'services') {
-                            const servSelect = document.getElementById('pos-service');
-                            if (servSelect) {
-                                const currentVal = servSelect.value;
-                                servSelect.innerHTML = '<option value="">-- Pilih Layanan --</option>' + data.map(s => `<option value="${s.id}" data-price="${s.price}">${s.name} - ${s.category} (${formatRp(s.price)})</option>`).join('');
-                                if (currentVal && data.find(s => s.id === currentVal)) servSelect.value = currentVal;
-                            }
-                        }
-                    } else {
-                        if (!isModalOpen) {
-                            window.renderCurrentView();
-                        }
-                    }
-                }, (error) => {
-                    console.error(`Error listening to ${colName}:`, error);
-                });
-            });
-        }
-
-        async function addData(colName, data) {
-            if (!currentUser) return null;
-            try {
-                data.createdAt = Date.now();
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', colName);
-                const docRef = await addDoc(colRef, data);
-                return docRef.id;
-            } catch (e) {
-                console.error("Add error", e);
-                showToast("Gagal menyimpan data", "❌");
-                throw e;
-            }
-        }
-
-        async function updateData(colName, id, data) {
-            if (!currentUser) return;
-            try {
-                data.updatedAt = Date.now();
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, id);
-                await updateDoc(docRef, data);
-            } catch (e) {
-                console.error("Update error", e);
-                showToast("Gagal update data", "❌");
-                throw e;
-            }
-        }
-
-        async function deleteData(colName, id) {
-            if (!currentUser) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, id);
-                await deleteDoc(docRef);
-            } catch (e) {
-                console.error("Delete error", e);
-                showToast("Gagal hapus data", "❌");
-                throw e;
-            }
-        }
     </script>
+    
 
     <script>
         function formatRp(angka) {

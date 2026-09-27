@@ -1853,6 +1853,80 @@
                 }
             }
         };
+
+                window.openTransactionDetailModal = function(trxId) {
+            const trx = window.appState.transactions.find(t => t.id === trxId);
+            if (!trx) return;
+
+            const modal = document.getElementById('trx-detail-modal');
+            const content = document.getElementById('trx-detail-modal-content');
+            const body = document.getElementById('trx-detail-body');
+
+            const payStatus = trx.paymentStatus || 'Belum Lunas';
+            const payMethod = trx.paymentMethod || 'Tunai';
+            const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
+            const sisa = Math.max(0, Number(trx.total) - paid);
+
+            let html = `
+                <div class="space-y-2">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">ID Order:</span>
+                        <span>TRX-${trx.id.slice(-6).toUpperCase()}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Tanggal:</span>
+                        <span>${formatDate(trx.createdAt)}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Pelanggan:</span>
+                        <span class="font-bold">${trx.customerName}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Layanan:</span>
+                        <span>${trx.serviceName} (${trx.qty})</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Status:</span>
+                        <span class="font-bold text-indigo-600">${trx.status}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Metode Bayar:</span>
+                        <span>${payMethod}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Status Bayar:</span>
+                        <span class="font-bold ${payStatus === 'Lunas' ? 'text-green-600' : 'text-orange-500'}">${payStatus}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-bold text-gray-600">Dibayar:</span>
+                        <span>${formatRp(paid)}</span>
+                    </div>
+                    ${sisa > 0 ? `
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="font-bold text-gray-600">Sisa:</span>
+                            <span class="font-bold text-red-500">${formatRp(sisa)}</span>
+                        </div>
+                    ` : ''}
+                    <div class="flex justify-between pt-2">
+                        <span class="font-bold text-gray-800 text-lg">Total Tagihan:</span>
+                        <span class="font-bold text-indigo-700 text-lg">${formatRp(trx.total)}</span>
+                    </div>
+                </div>
+            `;
+
+            history.pushState({ trxModalOpen: true }, "");
+            body.innerHTML = html;
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        };
+
+        window.closeTrxDetailModal = function() {
+            const content = document.getElementById('trx-detail-modal-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('trx-detail-modal').classList.add('hidden');
+            }, 300);
+        };
         
         
     </script>

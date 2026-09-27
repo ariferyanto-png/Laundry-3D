@@ -1552,6 +1552,49 @@
             printArea.innerHTML = html;
             window.print();
         };
+                window.shareTransaction = async function(trxId) {
+            const trx = window.appState.transactions.find(t => t.id === trxId);
+            if(!trx) return;
+
+            // Siapkan variabel pembayaran
+            const s = window.appState.settings;
+            const payStatus = trx.paymentStatus || 'Belum Lunas';
+            const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
+            const sisa = Math.max(0, Number(trx.total) - paid);
+
+            // Rangkai teks pesan nota
+            let msg = `*NOTA ${s.outletName}*\n`;
+            msg += `No. Order: TRX-${trx.id.slice(-6).toUpperCase()}\n`;
+            msg += `Pelanggan: ${trx.customerName}\n`;
+            msg += `Layanan: ${trx.serviceName} (${trx.qty})\n`;
+            msg += `Status Pengerjaan: *${trx.status}*\n\n`;
+            msg += `Total Tagihan: ${formatRp(trx.total)}\n`;
+            msg += `Status Bayar: ${payStatus}\n`;
+            msg += `Dibayar: ${formatRp(paid)}\n`;
+            if(sisa > 0) msg += `Sisa Kekurangan: ${formatRp(sisa)}\n`;
+            msg += `\nTerima kasih telah mencuci di outlet kami! 🧺\n_${s.outletAddress}_`;
+
+            // Panggil fitur Share Universal bawaan HP
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `Nota Laundry - ${trx.customerName}`,
+                        text: msg
+                    });
+                } catch (err) {
+                    console.log("Share dibatalkan oleh pengguna", err);
+                }
+            } else {
+                // Alternatif jika HP/Browser lama tidak mendukung fitur share universal
+                try {
+                    await navigator.clipboard.writeText(msg);
+                    showToast("Teks nota berhasil dicopy!", "📋");
+                } catch (err) {
+                    showToast("Gagal membagikan", "❌");
+                }
+            }
+        };
+        
 
     </script>
 </body>

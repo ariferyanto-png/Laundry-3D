@@ -1496,7 +1496,7 @@
             document.getElementById('confirm-modal').classList.add('hidden');
         }
 
-                window.printReceipt = function(trxId) {
+                  window.printReceipt = function(trxId) {
             const trx = window.appState.transactions.find(t => t.id === trxId);
             if(!trx) return;
 
@@ -1507,8 +1507,8 @@
             const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
             const sisa = Math.max(0, Number(trx.total) - paid);
             
-            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\\nPakaian bersih hati gembira';
-            const noteHtml = noteText.split('\\n').map(line => \`<p style="margin:0;">\${line}</p>\`).join('');
+            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\nPakaian bersih hati gembira';
+            const noteHtml = noteText.split('\n').map(line => `<p style="margin:0;">${line}</p>`).join('');
 
             let html = '';
             if (!s.hideLogo) {
@@ -1613,7 +1613,7 @@
             msg += `--------------------------------\n`;
             
             // Catatan Kustom (Diambil dari Pengaturan)
-            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\\nPakaian bersih hati gembira';
+            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\nPakaian bersih hati gembira';
             msg += noteText;
 
             if (navigator.share) {
@@ -1635,7 +1635,6 @@
             }
         };
 
-        
 
     </script>
 </body>

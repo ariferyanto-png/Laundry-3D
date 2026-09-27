@@ -1565,7 +1565,7 @@
                 </div>
             `;
 
-            saveBtn.onclick = async () => {
+                        saveBtn.onclick = async () => {
                 const newStatus = document.getElementById('s-status').value;
                 const newPay = document.getElementById('s-pay').value;
                 const newPaidAmount = parseFloat(document.getElementById('s-paid').value) || 0;
@@ -1575,6 +1575,7 @@
                         await window.dbActions.updateTransaction(trxId, { status: newStatus, paymentStatus: newPay, paidAmount: newPaidAmount });
                         closeModal(); 
                         showToast("Status Diupdate", "✅");
+                        window.renderCurrentView();
                     });
                 } else {
                     const originalText = saveBtn.innerText;
@@ -1584,6 +1585,7 @@
                         await window.dbActions.updateTransaction(trxId, { status: newStatus, paymentStatus: newPay, paidAmount: newPaidAmount });
                         closeModal();
                         showToast("Status Diupdate", "✅");
+                        window.renderCurrentView();
                     } catch (e) {
                         showToast("Gagal update", "❌");
                     } finally {
@@ -1592,6 +1594,7 @@
                     }
                 }
             };
+            
 
             modal.classList.remove('hidden');
             setTimeout(() => content.classList.remove('translate-y-full'), 10);

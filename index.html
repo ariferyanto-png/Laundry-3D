@@ -510,7 +510,7 @@
             `;
         }
 
-        function renderTransactions() {
+                function renderTransactions() {
             const trxs = window.appState.transactions;
             const filter = window.appState.trxFilter || 'all';
 
@@ -527,6 +527,11 @@
                     <button onclick="switchView('pos')" class="clay-btn bg-white px-3 py-1 text-sm font-bold text-indigo-600">+ Baru</button>
                 </div>
                 
+                <!-- Kotak Pencarian Baru -->
+                <div class="mb-4">
+                    <input type="text" class="clay-input w-full text-sm font-medium" placeholder="🔍 Cari nama pelanggan di sini..." oninput="window.searchTrx(this.value)">
+                </div>
+
                 <div class="flex gap-2 overflow-x-auto pb-2 mb-4 text-xs">
                     <button onclick="switchView('transactions', 'all')" class="clay-btn px-3 py-1.5 ${filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Semua</button>
                     <button onclick="switchView('transactions', 'Antrian')" class="clay-btn px-3 py-1.5 ${filter === 'Antrian' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Antrian</button>
@@ -541,6 +546,8 @@
 
             if (filteredTrxs.length === 0) {
                 html += `<div class="text-center text-gray-400 py-10">Belum ada transaksi ${filter !== 'all' ? `dengan status ${filter}` : ''}</div>`;
+            } else {
+                 html += `<div class="text-center text-gray-400 py-10 hidden" id="empty-search-msg">Pelanggan tidak ditemukan 🧐</div>`;
             }
 
             filteredTrxs.forEach(t => {
@@ -553,8 +560,9 @@
                 const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
                 const sisa = Math.max(0, Number(t.total) - paid);
 
+                // Menambahkan class "trx-card-item" dan data-name untuk disaring mesin pencari
                 html += `
-                    <div class="clay-card p-4 flex flex-col">
+                    <div class="clay-card p-4 flex flex-col trx-card-item" data-name="${t.customerName.toLowerCase()}">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h3 class="font-bold text-gray-800">${t.customerName}</h3>
@@ -565,25 +573,26 @@
                         <div class="flex justify-between items-end mt-2">
                             <div>
                                 <p class="text-sm font-semibold text-gray-700">${t.serviceName} (${t.qty})</p>
-                                <p class="text-xs font-bold ${payColor}">Status: ${payStatus} ${payStatus === 'DP' ? `(Dibayar: ${formatRp(paid)}, Sisa: ${formatRp(sisa)})` : ''}</p>
+                                <p class="text-xs font-bold ${payColor}">Status: ${payStatus} ${payStatus === 'DP' ? `(Dibayar: ${formatRp(paid)}, Sisa:${formatRp(sisa)})` : ''}</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-bold text-indigo-700 text-lg">${formatRp(t.total)}</p>
                             </div>
                         </div>
                         <div class="mt-4 flex gap-2 pt-3 border-t border-gray-300 border-opacity-50">
-    <button onclick="openStatusModal('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-white">Proses</button>
-    <button onclick="printReceipt('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-blue-50 text-blue-600 flex justify-center items-center gap-1">🖨️ Print</button>
-    <button onclick="shareTransaction('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-green-50 text-green-600 flex justify-center items-center gap-1">📤 Bagikan</button>
-</div>
-
+                            <button onclick="openStatusModal('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-white">Proses</button>
+                            <button onclick="printReceipt('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-blue-50 text-blue-600 flex justify-center items-center gap-1">🖨️ Print</button>
+                            <button onclick="shareTransaction('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-green-50 text-green-600 flex justify-center items-center gap-1">📤 Bagikan</button>
+                        </div>
                     </div>
                 `;
             });
 
             html += `</div>`;
             return html;
-        }
+                }
+        
+            
 
         function renderPOS() {
             const customers = window.appState.customers;

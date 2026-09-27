@@ -1304,12 +1304,14 @@
             setTimeout(() => content.classList.remove('translate-y-full'), 10);
         };
 
-                window.filterReportList = function(filterType) {
+                        window.filterReportList = function(filterType) {
             const startDate = document.getElementById('report-start-date').value;
             const endDate = document.getElementById('report-end-date').value;
             const payFilter = document.getElementById('report-filter-pay').value;
             const methodFilter = document.getElementById('report-filter-method').value;
             const container = document.getElementById('report-items-container');
+            
+            // JANGAN DIHAPUS: Ini yang memunculkan kotak total
             const totalContainer = document.getElementById('report-total-container');
             const totalAmountSpan = document.getElementById('report-total-amount');
             
@@ -1350,9 +1352,9 @@
 
             if (trxs.length === 0) {
                 html = `<div class="text-center text-gray-400 py-6 text-sm">Tidak ada transaksi yang cocok</div>`;
-                totalContainer.classList.add('hidden');
+                if(totalContainer) totalContainer.classList.add('hidden');
             } else {
-                totalContainer.classList.remove('hidden');
+                if(totalContainer) totalContainer.classList.remove('hidden');
                 
                 trxs.forEach(t => {
                     currentTotal += Number(t.total);
@@ -1360,7 +1362,7 @@
                     const payMethod = t.paymentMethod || 'Tunai';
                     const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
                     
-                    // Menambahkan class "cursor-pointer" dan event "onclick" untuk memanggil modal detail transaksi
+                    // KODE KLIK DETAIL: Ada tambahan 'onclick' dan 'cursor-pointer'
                     html += `
                         <div class="bg-white/90 p-3 rounded-xl border border-gray-200 text-xs space-y-1 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors" onclick="openTransactionDetailModal('${t.id}')">
                             <div class="flex justify-between font-bold text-gray-800">
@@ -1376,10 +1378,11 @@
                     `;
                 });
                 
-                totalAmountSpan.innerText = formatRp(currentTotal);
+                if(totalAmountSpan) totalAmountSpan.innerText = formatRp(currentTotal);
             }
             container.innerHTML = html;
         };
+
 
         
         

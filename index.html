@@ -892,7 +892,66 @@
             }, 0);
         };
 
+        window.openCustomerDetailModal = function(customerId) {
+            const customer = window.appState.customers.find(c => c.id === customerId);
+            if (!customer) return;
 
+            const modal = document.getElementById('form-modal');
+            const content = document.getElementById('form-modal-content');
+            const body = document.getElementById('modal-body');
+            const title = document.getElementById('modal-title');
+            const saveBtn = document.getElementById('modal-save-btn');
+            
+            saveBtn.style.display = 'none';
+            title.innerText = `Riwayat: ${customer.name}`;
+
+            const trxs = window.appState.transactions.filter(t => t.customerId === customerId);
+            const activeTrxs = trxs.filter(t => t.status !== 'Batal');
+            const totalTagihan = activeTrxs.reduce((sum, t) => sum + Number(t.total), 0);
+            
+            let html = `
+                <div class="card-3d-blue p-4 mb-4 text-center">
+                    <h3 class="text-xs font-semibold opacity-90 mb-1">Total Tagihan (Aktif)</h3>
+                    <h2 class="text-2xl font-bold">${formatRp(totalTagihan)}</h2>
+                </div>
+                <div class="space-y-3 max-h-[45vh] overflow-y-auto">
+            `;
+
+            if (trxs.length === 0) {
+                html += `<div class="text-center text-gray-400 py-6 text-sm">Belum ada riwayat transaksi</div>`;
+            } else {
+                trxs.forEach(t => {
+                    const statusColor = t.status === 'Batal' ? 'bg-red-100 text-red-600' :
+                                        t.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600';
+                    const payStatus = t.paymentStatus || 'Belum Lunas';
+                    
+                    html += `
+                        <div class="bg-white/90 p-3 rounded-xl border border-gray-200 text-xs space-y-1 shadow-sm">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="font-bold text-gray-800">${formatDate(t.createdAt)}</span>
+                                <span class="status-badge ${statusColor}">${t.status}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span>${t.serviceName} (${t.qty})</span>
+                                <span class="font-bold text-indigo-600">${formatRp(t.total)}</span>
+                            </div>
+                            <div class="pt-1 mt-1 border-t border-gray-100 text-right text-[10px] text-gray-500">
+                                Pembayaran: <span class="font-bold ${payStatus === 'Lunas' ? 'text-green-600' : 'text-orange-500'}">${payStatus}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+
+            history.pushState({ modalOpen: true }, "");
+            body.innerHTML = html;
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        };
+        
+
+        
         const originalRenderMasterData = renderMasterData;
         renderMasterData = function() {
             setTimeout(() => window.renderMasterContent('services'), 50);

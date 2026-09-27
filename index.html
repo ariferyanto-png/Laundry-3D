@@ -572,9 +572,11 @@
                             </div>
                         </div>
                         <div class="mt-4 flex gap-2 pt-3 border-t border-gray-300 border-opacity-50">
-                            <button onclick="openStatusModal('${t.id}')" class="clay-btn flex-1 py-1 text-sm bg-white">Proses Kerja</button>
-                            <button onclick="printReceipt('${t.id}')" class="clay-btn flex-1 py-1 text-sm bg-blue-50 text-blue-600 flex justify-center items-center gap-1">🖨️ Print</button>
-                        </div>
+    <button onclick="openStatusModal('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-white">Proses</button>
+    <button onclick="printReceipt('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-blue-50 text-blue-600 flex justify-center items-center gap-1">🖨️ Print</button>
+    <button onclick="shareTransaction('${t.id}')" class="clay-btn flex-1 py-1 text-xs bg-green-50 text-green-600 flex justify-center items-center gap-1">📤 Bagikan</button>
+</div>
+
                     </div>
                 `;
             });

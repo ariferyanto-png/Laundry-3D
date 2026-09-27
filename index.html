@@ -1711,6 +1711,34 @@
         window.addEventListener('load', () => {
             history.replaceState({ view: 'dashboard', filter: 'all' }, "");
         });
+
+        // fungsi pencarian pd transaksi
+        window.searchTrx = function(query) {
+            const lowerQuery = query.toLowerCase();
+            const cards = document.querySelectorAll('.trx-card-item');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name.includes(lowerQuery)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Tampilkan pesan jika pelanggan tidak ditemukan
+            const emptyMsg = document.getElementById('empty-search-msg');
+            if (emptyMsg) {
+                if (visibleCount === 0 && cards.length > 0) {
+                    emptyMsg.classList.remove('hidden');
+                } else {
+                    emptyMsg.classList.add('hidden');
+                }
+            }
+        };
+        
         
     </script>
 </body>

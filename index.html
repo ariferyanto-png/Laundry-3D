@@ -909,7 +909,7 @@
             }, 0);
         };
 
-        window.openCustomerDetailModal = function(customerId) {
+                window.openCustomerDetailModal = function(customerId) {
             const customer = window.appState.customers.find(c => c.id === customerId);
             if (!customer) return;
 
@@ -924,12 +924,19 @@
 
             const trxs = window.appState.transactions.filter(t => t.customerId === customerId);
             const activeTrxs = trxs.filter(t => t.status !== 'Batal');
-            const totalTagihan = activeTrxs.reduce((sum, t) => sum + Number(t.total), 0);
+            
+            // LOGIKA BARU: Hanya menghitung SISA yang belum dibayar (Hutang)
+            const sisaHutang = activeTrxs.reduce((sum, t) => {
+                const payStatus = t.paymentStatus || 'Belum Lunas';
+                const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
+                const sisa = Math.max(0, Number(t.total) - paid);
+                return sum + sisa;
+            }, 0);
             
             let html = `
-                <div class="card-3d-blue p-4 mb-4 text-center">
-                    <h3 class="text-xs font-semibold opacity-90 mb-1">Total Tagihan (Aktif)</h3>
-                    <h2 class="text-2xl font-bold">${formatRp(totalTagihan)}</h2>
+                <div class="card-3d-orange p-4 mb-4 text-center">
+                    <h3 class="text-xs font-semibold opacity-90 mb-1">Sisa Tagihan (Belum Lunas)</h3>
+                    <h2 class="text-2xl font-bold">${formatRp(sisaHutang)}</h2>
                 </div>
                 <div class="space-y-3 max-h-[45vh] overflow-y-auto">
             `;

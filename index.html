@@ -1784,18 +1784,27 @@
             oriOpenForm(type, id);
         };
 
-        // 3. Menangkap perintah usap layar / tombol Back fisik berurutan
+                // 3. Menangkap perintah usap layar / tombol Back fisik berurutan
         window.addEventListener('popstate', function(event) {
             const formModal = document.getElementById('form-modal');
             const confirmModal = document.getElementById('confirm-modal');
+            const trxDetailModal = document.getElementById('trx-detail-modal'); // Modal baru
             
-            // Tahap 1: Jika ada pop-up konfirmasi (batal transaksi) terbuka, tutup itu dulu
+            // Tahap 1: Tutup modal konfirmasi batal
             if (confirmModal && !confirmModal.classList.contains('hidden')) {
                 confirmModal.classList.add('hidden');
                 return;
             }
 
-            // Tahap 2: Jika ada jendela form/proses (modal) terbuka, tutup jendelanya
+            // Tahap 2: Tutup modal detail transaksi terlebih dahulu jika sedang terbuka
+            if (trxDetailModal && !trxDetailModal.classList.contains('hidden')) {
+                const content = document.getElementById('trx-detail-modal-content');
+                content.classList.add('translate-y-full');
+                setTimeout(() => { trxDetailModal.classList.add('hidden'); }, 300);
+                return;
+            }
+
+            // Tahap 3: Tutup modal form/proses
             if (formModal && !formModal.classList.contains('hidden')) {
                 const content = document.getElementById('form-modal-content');
                 content.classList.add('translate-y-full');
@@ -1803,14 +1812,14 @@
                 return;
             }
 
-            // Tahap 3: Jika tidak ada pop-up, kembali ke halaman/menu sebelumnya
+            // Tahap 4: Kembali ke halaman sebelumnya
             if (event.state && event.state.view) {
                 window.switchView(event.state.view, event.state.filter, true); 
             } else {
-                // Jika riwayat sudah mentok/habis, kembali ke dashboard sebagai layar utama
                 window.switchView('dashboard', 'all', true);
             }
         });
+        
 
         // 4. Sinkronisasi tombol silang (Batal/Tutup manual) dengan usapan layar
         const oriCloseModal = window.closeModal;

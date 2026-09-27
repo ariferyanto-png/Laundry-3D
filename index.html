@@ -814,7 +814,7 @@
             `;
         }
 
-        window.renderMasterContent = function(type) {
+                window.renderMasterContent = function(type) {
             setTimeout(() => {
                 const container = document.getElementById('master-content');
                 if(!container) return;
@@ -845,15 +845,23 @@
                         html += `<div class="text-center text-gray-400 py-6 text-sm">Belum ada pelanggan</div>`;
                     }
                     window.appState.customers.forEach(c => {
+                        // Menghitung total transaksi untuk setiap pelanggan
+                        const customerTrxs = window.appState.transactions.filter(t => t.customerId === c.id && t.status !== 'Batal');
+                        const totalTransactions = customerTrxs.length;
+                        const totalSpent = customerTrxs.reduce((sum, t) => sum + Number(t.total), 0);
+
                         html += `
-                            <div class="clay-card p-4 mb-3 flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold">${c.name}</h4>
-                                    <p class="text-xs text-gray-500">📞 ${c.phone || '-'}</p>
-                                    <p class="text-xs text-gray-500 mt-1">📍 ${c.address || '-'}</p>
+                            <div class="clay-card p-4 mb-3 flex flex-col gap-2 cursor-pointer transition-transform hover:scale-[1.02]" onclick="openCustomerDetailModal('${c.id}')">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">${c.name}</h4>
+                                        <p class="text-xs text-gray-500">📞 ${c.phone || '-'}</p>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); openFormModal('customer', '${c.id}')" class="p-1.5 bg-blue-100 rounded-lg text-blue-600 text-[10px] font-bold shadow-sm">Edit</button>
                                 </div>
-                                <div>
-                                    <button onclick="openFormModal('customer', '${c.id}')" class="p-2 bg-blue-100 rounded-lg text-blue-600 text-xs font-bold shadow-sm">Edit</button>
+                                <div class="pt-2 mt-1 border-t border-gray-200 flex justify-between items-center text-xs">
+                                    <span class="text-gray-500">Total Order: <span class="font-bold text-gray-700">${totalTransactions}x</span></span>
+                                    <span class="text-indigo-600 font-bold">${formatRp(totalSpent)}</span>
                                 </div>
                             </div>
                         `;
@@ -883,6 +891,7 @@
                 container.innerHTML = html;
             }, 0);
         };
+
 
         const originalRenderMasterData = renderMasterData;
         renderMasterData = function() {

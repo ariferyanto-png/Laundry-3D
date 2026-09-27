@@ -1037,7 +1037,6 @@
         };
         
                             
-
         function renderReports() {
             const trxs = window.appState.transactions;
             const activeTrxs = trxs.filter(t => t.status !== 'Batal');
@@ -1047,6 +1046,7 @@
             const lunas = trxs.filter(t => t.paymentStatus === 'Lunas').length;
             const dpCount = trxs.filter(t => t.paymentStatus === 'DP').length;
             const belumLunas = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas').length;
+            const selesaiCount = trxs.filter(t => t.status === 'Selesai').length;
             const batal = trxs.filter(t => t.status === 'Batal').length;
 
             return `
@@ -1101,6 +1101,18 @@
                         <span class="text-xl font-bold text-red-500">${belumLunas}</span>
                     </div>
 
+                    <!-- KARTU TRANSAKSI SELESAI BARU -->
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('selesai')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">🏁</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Laporan Transaksi Selesai</span>
+                                <span class="text-[10px] text-blue-600 font-semibold">Klik untuk lihat rincian</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-blue-600">${selesaiCount}</span>
+                    </div>
+
                     <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('batal')">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl icon-3d">❌</span>
@@ -1109,7 +1121,7 @@
                                 <span class="text-[10px] text-gray-500 font-semibold">Klik untuk lihat rincian</span>
                             </div>
                         </div>
-                        <span class="text-xl font-bold text-red-500">${batal}</span>
+                        <span class="text-xl font-bold text-gray-500">${batal}</span>
                     </div>
                 </div>
             `;
@@ -1131,6 +1143,7 @@
             if (filterType === 'lunas') filtered = trxs.filter(t => t.paymentStatus === 'Lunas');
             else if (filterType === 'dp') filtered = trxs.filter(t => t.paymentStatus === 'DP');
             else if (filterType === 'belum') filtered = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas');
+            else if (filterType === 'selesai') filtered = trxs.filter(t => t.status === 'Selesai');
             else if (filterType === 'batal') filtered = trxs.filter(t => t.status === 'Batal');
 
             let listHtml = `
@@ -1193,6 +1206,7 @@
             }
             listHtml += `</div>`;
 
+            history.pushState({ modalOpen: true }, ""); 
             body.innerHTML = listHtml;
             modal.classList.remove('hidden');
             setTimeout(() => content.classList.remove('translate-y-full'), 10);
@@ -1210,6 +1224,7 @@
             if (filterType === 'lunas') trxs = trxs.filter(t => t.paymentStatus === 'Lunas');
             else if (filterType === 'dp') trxs = trxs.filter(t => t.paymentStatus === 'DP');
             else if (filterType === 'belum') trxs = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas');
+            else if (filterType === 'selesai') trxs = trxs.filter(t => t.status === 'Selesai');
             else if (filterType === 'batal') trxs = trxs.filter(t => t.status === 'Batal');
 
             if (payFilter !== 'all') {
@@ -1260,7 +1275,8 @@
             }
             container.innerHTML = html;
         };
-
+        
+        
         function openFormModal(type, id = null) {
             const modal = document.getElementById('form-modal');
             const content = document.getElementById('form-modal-content');

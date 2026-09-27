@@ -1496,7 +1496,7 @@
             document.getElementById('confirm-modal').classList.add('hidden');
         }
 
-        window.printReceipt = function(trxId) {
+                window.printReceipt = function(trxId) {
             const trx = window.appState.transactions.find(t => t.id === trxId);
             if(!trx) return;
 
@@ -1507,6 +1507,9 @@
             const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
             const sisa = Math.max(0, Number(trx.total) - paid);
             
+            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\\nPakaian bersih hati gembira';
+            const noteHtml = noteText.split('\\n').map(line => \`<p style="margin:0;">\${line}</p>\`).join('');
+
             let html = '';
             if (!s.hideLogo) {
                 html += `<div style="text-align: center; margin-bottom: 5px; font-size: 16px;">🧺</div>`;
@@ -1558,37 +1561,61 @@
                 </table>
                 <div style="border-bottom: 1px dashed black; margin-top: 5px; margin-bottom: 10px;"></div>
                 <div style="text-align: center; font-size: 10px;">
-                    <p style="margin:0;">Terima Kasih</p>
-                    <p style="margin:0;">Pakaian bersih hati gembira</p>
+                    ${noteHtml}
                 </div>
             `;
             
             printArea.innerHTML = html;
             window.print();
         };
-                window.shareTransaction = async function(trxId) {
+
+        window.shareTransaction = async function(trxId) {
             const trx = window.appState.transactions.find(t => t.id === trxId);
             if(!trx) return;
 
-            // Siapkan variabel pembayaran
             const s = window.appState.settings;
             const payStatus = trx.paymentStatus || 'Belum Lunas';
             const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
             const sisa = Math.max(0, Number(trx.total) - paid);
+            const d = new Date(trx.createdAt || Date.now());
+            const dateStr = d.toLocaleDateString('id-ID') + ' ' + d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+            const hargaSatuan = trx.qty > 0 ? (trx.total / trx.qty) : trx.total;
 
-            // Rangkai teks pesan nota
-            let msg = `*NOTA ${s.outletName}*\n`;
-            msg += `No. Order: TRX-${trx.id.slice(-6).toUpperCase()}\n`;
-            msg += `Pelanggan: ${trx.customerName}\n`;
-            msg += `Layanan: ${trx.serviceName} (${trx.qty})\n`;
-            msg += `Status Pengerjaan: *${trx.status}*\n\n`;
-            msg += `Total Tagihan: ${formatRp(trx.total)}\n`;
-            msg += `Status Bayar: ${payStatus}\n`;
-            msg += `Dibayar: ${formatRp(paid)}\n`;
-            if(sisa > 0) msg += `Sisa Kekurangan: ${formatRp(sisa)}\n`;
-            msg += `\nTerima kasih telah mencuci di outlet kami! 🧺\n_${s.outletAddress}_`;
+            let msg = '';
+            
+            // Header menyerupai print struk
+            if (!s.hideOutletName) {
+                msg += `*${s.outletName.toUpperCase()}*\n`;
+                msg += `${s.outletAddress}\n`;
+                msg += `Telp: ${s.outletPhone}\n`;
+                msg += `--------------------------------\n`;
+            }
+            
+            if (s.showTrxNumber) {
+                msg += `No  : TRX-${trx.id.slice(-6).toUpperCase()}\n`;
+            }
+            msg += `Tgl : ${dateStr}\n`;
+            msg += `Plg : ${trx.customerName}\n`;
+            msg += `--------------------------------\n`;
+            
+            // Detail Pesanan
+            msg += `*${trx.serviceName}*\n`;
+            msg += `${trx.qty} x ${formatRp(hargaSatuan)} = *${formatRp(trx.total)}*\n`;
+            msg += `--------------------------------\n`;
+            
+            // Total & Pembayaran
+            msg += `TOTAL   : *${formatRp(trx.total)}*\n`;
+            msg += `STATUS  : ${payStatus.toUpperCase()}\n`;
+            msg += `DIBAYAR : ${formatRp(paid)}\n`;
+            if (sisa > 0) {
+                msg += `SISA    : ${formatRp(sisa)}\n`;
+            }
+            msg += `--------------------------------\n`;
+            
+            // Catatan Kustom (Diambil dari Pengaturan)
+            const noteText = s.receiptNote !== undefined ? s.receiptNote : 'Terima Kasih\\nPakaian bersih hati gembira';
+            msg += noteText;
 
-            // Panggil fitur Share Universal bawaan HP
             if (navigator.share) {
                 try {
                     await navigator.share({
@@ -1596,18 +1623,18 @@
                         text: msg
                     });
                 } catch (err) {
-                    console.log("Share dibatalkan oleh pengguna", err);
+                    console.log("Share dibatalkan", err);
                 }
             } else {
-                // Alternatif jika HP/Browser lama tidak mendukung fitur share universal
                 try {
                     await navigator.clipboard.writeText(msg);
-                    showToast("Teks nota berhasil dicopy!", "📋");
+                    showToast("Teks nota berhasil disalin!", "📋");
                 } catch (err) {
                     showToast("Gagal membagikan", "❌");
                 }
             }
         };
+
         
 
     </script>

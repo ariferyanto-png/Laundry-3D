@@ -1635,7 +1635,74 @@
             }
         };
 
+        // ==== SISTEM PENGENDALI TOMBOL BACK MULTI-TAHAP ====
+        
+        // 1. Memanipulasi navigasi menu utama (switchView)
+        const oriSwitchView = window.switchView;
+        window.switchView = function(viewName, filter = 'all', isBack = false) {
+            // Jika perpindahan ini bukan dari usapan tombol back, catat ke riwayat HP
+            if (!isBack) {
+                history.pushState({ view: viewName, filter: filter }, "");
+            }
+            oriSwitchView(viewName, filter);
+        };
 
+        // 2. Memanipulasi saat jendela pop-up (Modal) terbuka
+        const oriOpenStatus = window.openStatusModal;
+        window.openStatusModal = function(trxId) {
+            history.pushState({ modalOpen: true }, ""); 
+            oriOpenStatus(trxId);
+        };
+
+        const oriOpenForm = window.openFormModal;
+        window.openFormModal = function(type, id) {
+            history.pushState({ modalOpen: true }, "");
+            oriOpenForm(type, id);
+        };
+
+        // 3. Menangkap perintah usap layar / tombol Back fisik berurutan
+        window.addEventListener('popstate', function(event) {
+            const formModal = document.getElementById('form-modal');
+            const confirmModal = document.getElementById('confirm-modal');
+            
+            // Tahap 1: Jika ada pop-up konfirmasi (batal transaksi) terbuka, tutup itu dulu
+            if (confirmModal && !confirmModal.classList.contains('hidden')) {
+                confirmModal.classList.add('hidden');
+                return;
+            }
+
+            // Tahap 2: Jika ada jendela form/proses (modal) terbuka, tutup jendelanya
+            if (formModal && !formModal.classList.contains('hidden')) {
+                const content = document.getElementById('form-modal-content');
+                content.classList.add('translate-y-full');
+                setTimeout(() => { formModal.classList.add('hidden'); }, 300);
+                return;
+            }
+
+            // Tahap 3: Jika tidak ada pop-up, kembali ke halaman/menu sebelumnya
+            if (event.state && event.state.view) {
+                window.switchView(event.state.view, event.state.filter, true); 
+            } else {
+                // Jika riwayat sudah mentok/habis, kembali ke dashboard sebagai layar utama
+                window.switchView('dashboard', 'all', true);
+            }
+        });
+
+        // 4. Sinkronisasi tombol silang (Batal/Tutup manual) dengan usapan layar
+        const oriCloseModal = window.closeModal;
+        window.closeModal = function() {
+            if (history.state && history.state.modalOpen) {
+                history.back(); // Memicu usapan mundur secara halus
+            } else {
+                oriCloseModal();
+            }
+        };
+
+        // 5. Daftarkan halaman pertama sebagai pondasi riwayat saat aplikasi dibuka
+        window.addEventListener('load', () => {
+            history.replaceState({ view: 'dashboard', filter: 'all' }, "");
+        });
+        
     </script>
 </body>
 </html>

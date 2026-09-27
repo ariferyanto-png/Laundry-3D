@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry 3D Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e0e5ec;
+            color: #2d3748;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 3D Claymorphism / Neumorphism Styles */
+        .clay-card {
+            background: #e0e5ec;
+            border-radius: 1.25rem;
+            box-shadow: 9px 9px 16px rgb(163,177,198,0.6), 
+                       -9px -9px 16px rgba(255,255,255, 0.5),
+                       inset 2px 2px 4px rgba(255,255,255,0.4),
+                       inset -2px -2px 4px rgba(0,0,0,0.05);
+        }
+
+        .clay-btn {
+            background: #e0e5ec;
+            border-radius: 1rem;
+            box-shadow: 5px 5px 10px rgb(163,177,198,0.6), 
+                       -5px -5px 10px rgba(255,255,255, 0.5);
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .clay-btn:active {
+            box-shadow: inset 5px 5px 10px rgb(163,177,198,0.6), 
+                       inset -5px -5px 10px rgba(255,255,255, 0.5);
+            transform: translateY(2px);
+        }
+
+        .clay-btn-primary {
+            background: #4ade80;
+            color: white;
+            box-shadow: 5px 5px 10px rgb(163,177,198,0.6), 
+                       -5px -5px 10px rgba(255,255,255, 0.5),
+                       inset 3px 3px 6px rgba(255,255,255,0.4),
+                       inset -3px -3px 6px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .clay-btn-primary:active {
+            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.2), 
+                       inset -5px -5px 10px rgba(255,255,255, 0.4);
+        }
+
+        .clay-btn-danger {
+            background: #f87171;
+            color: white;
+            box-shadow: 5px 5px 10px rgb(163,177,198,0.6), 
+                       -5px -5px 10px rgba(255,255,255, 0.5),
+                       inset 3px 3px 6px rgba(255,255,255,0.4),
+                       inset -3px -3px 6px rgba(0,0,0,0.2);
+        }
+
+        .clay-input {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: inset 5px 5px 10px rgb(163,177,198,0.6), 
+                       inset -5px -5px 10px rgba(255,255,255, 0.5);
+            padding: 0.75rem 1rem;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .clay-input:focus {
+            box-shadow: inset 7px 7px 12px rgb(163,177,198,0.7), 
+                       inset -7px -7px 12px rgba(255,255,255, 0.6);
+        }
+
+        /* 3D Colorful Cards */
+        .card-3d-blue { background: linear-gradient(145deg, #3b82f6, #60a5fa); color: white; box-shadow: 5px 5px 15px rgba(59,130,246,0.4), inset 2px 2px 5px rgba(255,255,255,0.4), inset -3px -3px 5px rgba(0,0,0,0.2); border-radius: 1.25rem; }
+        .card-3d-green { background: linear-gradient(145deg, #10b981, #34d399); color: white; box-shadow: 5px 5px 15px rgba(16,185,129,0.4), inset 2px 2px 5px rgba(255,255,255,0.4), inset -3px -3px 5px rgba(0,0,0,0.2); border-radius: 1.25rem; }
+        .card-3d-orange { background: linear-gradient(145deg, #f97316, #fb923c); color: white; box-shadow: 5px 5px 15px rgba(249,115,22,0.4), inset 2px 2px 5px rgba(255,255,255,0.4), inset -3px -3px 5px rgba(0,0,0,0.2); border-radius: 1.25rem; }
+        .card-3d-red { background: linear-gradient(145deg, #ef4444, #f87171); color: white; box-shadow: 5px 5px 15px rgba(239,68,68,0.4), inset 2px 2px 5px rgba(255,255,255,0.4), inset -3px -3px 5px rgba(0,0,0,0.2); border-radius: 1.25rem; }
+
+        .icon-3d {
+            font-size: 2.5rem;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            background: rgba(224, 229, 236, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            transition: transform 0.2s;
+        }
+        .nav-item.active {
+            color: #4f46e5;
+            transform: scale(1.1);
+            text-shadow: 0px 2px 4px rgba(79,70,229,0.3);
+        }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Print Styles for 58mm Thermal Printer */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 58mm; /* Thermal paper width */
+                margin: 0;
+                padding: 0;
+                font-family: monospace;
+                font-size: 12px;
+                color: black;
+                background: white;
+            }
+            .no-print { display: none !important; }
+        }
+
+        /* Custom Modal */
+        .modal-overlay {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: inset 1px 1px 3px rgba(255,255,255,0.4), inset -1px -1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col relative">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-[#e0e5ec]">
+        <div class="clay-card p-8 w-full max-w-sm flex flex-col items-center">
+            <div class="text-6xl mb-4 icon-3d">🧺</div>
+            <h1 class="text-2xl font-bold mb-2 text-center text-indigo-600">Laundry 3D</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Masukkan sandi untuk masuk</p>
+            
+            <input type="password" id="login-password" class="clay-input mb-6 text-center text-xl" placeholder="••••••••">
+            
+            <button onclick="handleLogin()" class="clay-btn clay-btn-primary w-full py-3 text-lg">Masuk Aplikasi</button>
+            <p class="text-xs text-gray-400 mt-4">Demo Sandi: admin123</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="flex-1 overflow-y-auto pb-24 hidden relative">
+        
+        <!-- Header -->
+        <div class="sticky top-0 z-30 bg-[#e0e5ec] bg-opacity-90 backdrop-blur-md p-4 shadow-sm flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl icon-3d">🧺</span>
+                <h1 class="font-bold text-xl text-indigo-800" id="header-title">Dashboard</h1>
+            </div>
+            <div class="clay-card px-3 py-1 text-xs font-bold text-green-600 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+            </div>
+        </div>
+
+        <!-- Views Container -->
+        <div class="p-4 space-y-6" id="view-container">
+            <!-- Content dynamically rendered here -->
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav" class="bottom-nav fixed bottom-0 w-full h-16 flex justify-around items-center z-40 hidden pb-safe">
+        <button onclick="switchView('dashboard')" class="nav-item active flex flex-col items-center p-2 w-1/5" id="nav-dashboard">
+            <span class="text-xl">📊</span>
+            <span class="text-[9px] font-semibold mt-1">Dashboard</span>
+        </button>
+        <button onclick="switchView('transactions', 'all')" class="nav-item flex flex-col items-center p-2 w-1/5" id="nav-transactions">
+            <span class="text-xl">📝</span>
+            <span class="text-[9px] font-semibold mt-1">Transaksi</span>
+        </button>
+        <button onclick="switchView('master')" class="nav-item flex flex-col items-center p-2 w-1/5" id="nav-master">
+            <span class="text-xl">📁</span>
+            <span class="text-[9px] font-semibold mt-1">Data</span>
+        </button>
+        <button onclick="switchView('reports')" class="nav-item flex flex-col items-center p-2 w-1/5" id="nav-reports">
+            <span class="text-xl">📈</span>
+            <span class="text-[9px] font-semibold mt-1">Laporan</span>
+        </button>
+        <button onclick="switchView('settings')" class="nav-item flex flex-col items-center p-2 w-1/5" id="nav-settings">
+            <span class="text-xl">⚙️</span>
+            <span class="text-[9px] font-semibold mt-1">Pengaturan</span>
+        </button>
+    </div>
+
+    <!-- Print Area (Hidden on screen, visible on print) -->
+    <div id="print-area" class="hidden"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+        <div class="clay-card bg-gray-800 text-white px-4 py-2 text-sm flex items-center gap-2 shadow-xl border border-gray-700">
+            <span id="toast-icon">✅</span>
+            <span id="toast-msg">Pesan sukses</span>
+        </div>
+    </div>
+
+    <!-- Generic Form Modal -->
+    <div id="form-modal" class="modal-overlay fixed inset-0 z-50 hidden flex justify-center items-end sm:items-center">
+        <div class="clay-card w-full sm:w-96 p-6 rounded-b-none sm:rounded-2xl transform transition-transform duration-300 translate-y-full" id="form-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold" id="modal-title">Judul Form</h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="modal-body" class="space-y-4 max-h-[60vh] overflow-y-auto p-1">
+                <!-- Form fields injected here -->
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeModal()" class="clay-btn flex-1 py-2 text-gray-600">Batal</button>
+                <button id="modal-save-btn" class="clay-btn clay-btn-primary flex-1 py-2">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action/Confirm Modal -->
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 z-[60] hidden flex justify-center items-center p-4">
+        <div class="clay-card w-full max-w-xs p-6 text-center">
+            <div id="confirm-icon" class="text-4xl mb-2 icon-3d">❓</div>
+            <h3 id="confirm-title" class="font-bold text-lg mb-2">Konfirmasi</h3>
+            <p id="confirm-msg" class="text-sm text-gray-600 mb-6">Apakah Anda yakin?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirm()" class="clay-btn flex-1 py-2 text-gray-600">Batal</button>
+                <button id="confirm-yes-btn" class="clay-btn clay-btn-danger flex-1 py-2">Ya, Yakin</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'laundry-3d-app';
+        let firebaseConfig = null;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            firebaseConfig = { apiKey: "mock", projectId: "mock" };
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let currentUser = null;
+
+        window.appState = {
+            transactions: [],
+            services: [],
+            customers: [],
+            employees: [],
+            currentView: 'dashboard',
+            trxFilter: 'all',
+            settings: {
+                outletName: 'LAUNDRY 3D PRO',
+                outletAddress: 'Jl. Bersih Selalu No. 1',
+                outletPhone: '08123456789',
+                hideOutletName: false,
+                hideLogo: false,
+                showTrxNumber: true,
+                showServiceDetail: true
+            }
+        };
+
+        // Load settings from localStorage if available
+        const savedSettings = localStorage.getItem('laundry_settings');
+        if (savedSettings) {
+            try {
+                window.appState.settings = JSON.parse(savedSettings);
+            } catch(e) {}
+        }
+
+        const STATUS = {
+            ANTRIAN: 'Antrian',
+            PROSES: 'Proses',
+            SIAP: 'Siap Ambil',
+            SELESAI: 'Selesai',
+            BATAL: 'Batal'
+        };
+
+        window.dbActions = {
+            addTransaction: async (data) => await addData('transactions', data),
+            updateTransaction: async (id, data) => await updateData('transactions', id, data),
+            addService: async (data) => await addData('services', data),
+            updateService: async (id, data) => await updateData('services', id, data),
+            deleteService: async (id) => await deleteData('services', id),
+            addCustomer: async (data) => await addData('customers', data),
+            updateCustomer: async (id, data) => await updateData('customers', id, data),
+            deleteCustomer: async (id) => await deleteData('customers', id),
+            addEmployee: async (data) => await addData('employees', data),
+            updateEmployee: async (id, data) => await updateData('employees', id, data),
+            deleteEmployee: async (id) => await deleteData('employees', id),
+        };
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+                showToast("Gagal koneksi ke cloud", "❌");
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                setupRealtimeListeners();
+            }
+        });
+
+        initAuth();
+
+        function setupRealtimeListeners() {
+            if (!currentUser) return;
+
+            const collections = ['transactions', 'services', 'customers', 'employees'];
+            
+            collections.forEach(colName => {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', colName));
+                onSnapshot(q, (snapshot) => {
+                    const data = [];
+                    snapshot.forEach((doc) => {
+                        data.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    window.appState[colName] = data;
+                    
+                    const modal = document.getElementById('form-modal');
+                    const confirmModal = document.getElementById('confirm-modal');
+                    const isModalOpen = (modal && !modal.classList.contains('hidden')) || (confirmModal && !confirmModal.classList.contains('hidden'));
+
+                    if (window.appState.currentView === 'pos') {
+                        if (colName === 'customers') {
+                            const custSelect = document.getElementById('pos-customer');
+                            if (custSelect) {
+                                const currentVal = custSelect.value;
+                                custSelect.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' + data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                                if (currentVal && data.find(c => c.id === currentVal)) {
+                                    custSelect.value = currentVal;
+                                } else if (data.length > 0 && !currentVal) {
+                                    custSelect.value = data[0].id;
+                                }
+                            }
+                        } else if (colName === 'services') {
+                            const servSelect = document.getElementById('pos-service');
+                            if (servSelect) {
+                                const currentVal = servSelect.value;
+                                servSelect.innerHTML = '<option value="">-- Pilih Layanan --</option>' + data.map(s => `<option value="${s.id}" data-price="${s.price}">${s.name} - ${s.category} (${formatRp(s.price)})</option>`).join('');
+                                if (currentVal && data.find(s => s.id === currentVal)) servSelect.value = currentVal;
+                            }
+                        }
+                    } else {
+                        if (!isModalOpen) {
+                            window.renderCurrentView();
+                        }
+                    }
+                }, (error) => {
+                    console.error(`Error listening to ${colName}:`, error);
+                });
+            });
+        }
+
+        async function addData(colName, data) {
+            if (!currentUser) return null;
+            try {
+                data.createdAt = Date.now();
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', colName);
+                const docRef = await addDoc(colRef, data);
+                return docRef.id;
+            } catch (e) {
+                console.error("Add error", e);
+                showToast("Gagal menyimpan data", "❌");
+                throw e;
+            }
+        }
+
+        async function updateData(colName, id, data) {
+            if (!currentUser) return;
+            try {
+                data.updatedAt = Date.now();
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, id);
+                await updateDoc(docRef, data);
+            } catch (e) {
+                console.error("Update error", e);
+                showToast("Gagal update data", "❌");
+                throw e;
+            }
+        }
+
+        async function deleteData(colName, id) {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, id);
+                await deleteDoc(docRef);
+            } catch (e) {
+                console.error("Delete error", e);
+                showToast("Gagal hapus data", "❌");
+                throw e;
+            }
+        }
+    </script>
+
+    <script>
+        function formatRp(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const d = new Date(timestamp);
+            return d.toLocaleDateString('id-ID') + ' ' + d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+        }
+
+        function showToast(msg, icon = "✅") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = icon;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 3000);
+        }
+
+        function handleLogin() {
+            const pass = document.getElementById('login-password').value;
+            if (pass === 'admin123') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('bottom-nav').classList.add('flex');
+                showToast("Berhasil Masuk", "🎉");
+                switchView('dashboard');
+            } else {
+                showToast("Sandi Salah!", "❌");
+            }
+        }
+
+        window.switchView = function(viewName, filter = 'all') {
+            window.appState.currentView = viewName;
+            if (viewName === 'transactions') {
+                window.appState.trxFilter = filter;
+            }
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            let activeBtnId = 'nav-dashboard';
+            if (viewName === 'transactions' || viewName === 'pos') activeBtnId = 'nav-transactions';
+            else if (viewName === 'master') activeBtnId = 'nav-master';
+            else if (viewName === 'reports') activeBtnId = 'nav-reports';
+            else if (viewName === 'settings') activeBtnId = 'nav-settings';
+
+            const activeBtn = document.getElementById(activeBtnId);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            const titles = {
+                'dashboard': 'Dashboard',
+                'transactions': 'Daftar Transaksi',
+                'pos': 'Transaksi Baru',
+                'master': 'Master Data',
+                'reports': 'Laporan Keuangan',
+                'settings': 'Pengaturan & Nota'
+            };
+            document.getElementById('header-title').innerText = titles[viewName] || 'Laundry 3D';
+
+            renderCurrentView();
+        }
+
+        window.renderCurrentView = function() {
+            const container = document.getElementById('view-container');
+            container.innerHTML = '';
+
+            switch (window.appState.currentView) {
+                case 'dashboard':
+                    container.innerHTML = renderDashboard();
+                    break;
+                case 'transactions':
+                    container.innerHTML = renderTransactions();
+                    break;
+                case 'pos':
+                    container.innerHTML = renderPOS();
+                    break;
+                case 'master':
+                    container.innerHTML = renderMasterData();
+                    break;
+                case 'reports':
+                    container.innerHTML = renderReports();
+                    break;
+                case 'settings':
+                    container.innerHTML = renderSettings();
+                    break;
+            }
+        };
+
+        function renderDashboard() {
+            const trxs = window.appState.transactions;
+            const omset = trxs.filter(t => t.status !== 'Batal')
+                              .reduce((sum, t) => sum + (Number(t.paidAmount) || (t.paymentStatus === 'Lunas' ? Number(t.total) : 0) || 0), 0);
+            
+            const totalMasuk = trxs.length;
+            const activeTrxCount = trxs.filter(t => t.status !== 'Selesai' && t.status !== 'Batal').length;
+
+            return `
+                <div class="card-3d-blue p-6 mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold opacity-90">Total Omset (Diterima)</h3>
+                        <span class="icon-3d text-3xl">💰</span>
+                    </div>
+                    <h2 class="text-3xl font-bold">${formatRp(omset)}</h2>
+                    <p class="text-xs opacity-75 mt-2">Akumulasi pembayaran masuk</p>
+                </div>
+
+                <div class="clay-card p-4 mb-4 flex justify-between items-center cursor-pointer hover:scale-[1.01] transition-transform" onclick="switchView('transactions', 'all')">
+                    <div class="flex items-center gap-3">
+                        <span class="icon-3d text-2xl">📥</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Total Transaksi Masuk</h4>
+                            <p class="text-xs text-gray-500">Semua order tercatat</p>
+                        </div>
+                    </div>
+                    <span class="text-xl font-bold text-indigo-600">${totalMasuk}</span>
+                </div>
+
+                <!-- Simplified Single Card for Proses Pengerjaan Order -->
+                <div onclick="switchView('transactions', 'all')" class="clay-card p-5 mb-6 cursor-pointer hover:scale-[1.01] transition-transform flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="icon-3d text-3xl">📋</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-base">Proses Pengerjaan Order</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Kelola antrian, proses, & siap ambil</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl font-bold text-indigo-600">${activeTrxCount} Aktif</span>
+                        <span class="block text-[10px] text-gray-400">Ketuk untuk detail</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-center">
+                    <button onclick="switchView('pos')" class="clay-btn clay-btn-primary w-full py-4 text-lg flex justify-center items-center gap-2">
+                        <span class="text-2xl">➕</span> Buat Transaksi Baru
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderTransactions() {
+            const trxs = window.appState.transactions;
+            const filter = window.appState.trxFilter || 'all';
+
+            let filteredTrxs = trxs;
+            if (filter !== 'all') {
+                filteredTrxs = trxs.filter(t => t.status === filter);
+            }
+            
+            let html = `
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="font-bold text-gray-700">Daftar Order ${filter !== 'all' ? `(${filter})` : ''}</h2>
+                    </div>
+                    <button onclick="switchView('pos')" class="clay-btn bg-white px-3 py-1 text-sm font-bold text-indigo-600">+ Baru</button>
+                </div>
+                
+                <div class="flex gap-2 overflow-x-auto pb-2 mb-4 text-xs">
+                    <button onclick="switchView('transactions', 'all')" class="clay-btn px-3 py-1.5 ${filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Semua</button>
+                    <button onclick="switchView('transactions', 'Antrian')" class="clay-btn px-3 py-1.5 ${filter === 'Antrian' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Antrian</button>
+                    <button onclick="switchView('transactions', 'Proses')" class="clay-btn px-3 py-1.5 ${filter === 'Proses' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Proses</button>
+                    <button onclick="switchView('transactions', 'Siap Ambil')" class="clay-btn px-3 py-1.5 ${filter === 'Siap Ambil' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Siap Ambil</button>
+                    <button onclick="switchView('transactions', 'Selesai')" class="clay-btn px-3 py-1.5 ${filter === 'Selesai' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Selesai</button>
+                    <button onclick="switchView('transactions', 'Batal')" class="clay-btn px-3 py-1.5 ${filter === 'Batal' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}">Batal</button>
+                </div>
+
+                <div class="space-y-4">
+            `;
+
+            if (filteredTrxs.length === 0) {
+                html += `<div class="text-center text-gray-400 py-10">Belum ada transaksi ${filter !== 'all' ? `dengan status ${filter}` : ''}</div>`;
+            }
+
+            filteredTrxs.forEach(t => {
+                const statusColor = t.status === 'Batal' ? 'bg-red-100 text-red-600' :
+                                    t.status === 'Selesai' ? 'bg-green-100 text-green-600' :
+                                    t.status === 'Siap Ambil' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600';
+                
+                const payStatus = t.paymentStatus || 'Belum Lunas';
+                const payColor = payStatus === 'Lunas' ? 'text-green-600' : (payStatus === 'DP' ? 'text-orange-500' : 'text-red-500');
+                const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
+                const sisa = Math.max(0, Number(t.total) - paid);
+
+                html += `
+                    <div class="clay-card p-4 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-bold text-gray-800">${t.customerName}</h3>
+                                <p class="text-xs text-gray-500">${formatDate(t.createdAt)}</p>
+                            </div>
+                            <span class="status-badge ${statusColor}">${t.status}</span>
+                        </div>
+                        <div class="flex justify-between items-end mt-2">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">${t.serviceName} (${t.qty})</p>
+                                <p class="text-xs font-bold ${payColor}">Status: ${payStatus} ${payStatus === 'DP' ? `(Dibayar: ${formatRp(paid)}, Sisa: ${formatRp(sisa)})` : ''}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-indigo-700 text-lg">${formatRp(t.total)}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex gap-2 pt-3 border-t border-gray-300 border-opacity-50">
+                            <button onclick="openStatusModal('${t.id}')" class="clay-btn flex-1 py-1 text-sm bg-white">Proses Kerja</button>
+                            <button onclick="printReceipt('${t.id}')" class="clay-btn flex-1 py-1 text-sm bg-blue-50 text-blue-600 flex justify-center items-center gap-1">🖨️ Print</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            return html;
+        }
+
+        function renderPOS() {
+            const customers = window.appState.customers;
+            const services = window.appState.services;
+
+            let custOptions = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            let servOptions = services.map(s => `<option value="${s.id}" data-price="${s.price}">${s.name} - ${s.category} (${formatRp(s.price)})</option>`).join('');
+
+            return `
+                <div class="clay-card p-5 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Pelanggan</label>
+                        <select id="pos-customer" class="clay-input mb-1">
+                            <option value="">-- Pilih Pelanggan --</option>
+                            ${custOptions}
+                        </select>
+                        <button onclick="openFormModal('customer')" class="text-xs text-indigo-600 font-bold flex items-center gap-1 mt-2 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 shadow-sm active:bg-indigo-100"><span class="text-lg leading-none">+</span> Tambah Pelanggan Baru</button>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Layanan</label>
+                        <select id="pos-service" class="clay-input" onchange="calculatePosTotal()">
+                            <option value="">-- Pilih Layanan --</option>
+                            ${servOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Jumlah / Berat (Kg)</label>
+                        <input type="number" id="pos-qty" class="clay-input" value="1" min="1" step="0.1" oninput="calculatePosTotal()">
+                    </div>
+                    
+                    <div class="card-3d-orange p-4 flex justify-between items-center mt-4">
+                        <span class="font-bold">Total Bayar:</span>
+                        <span class="text-2xl font-bold" id="pos-total-display">Rp 0</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Status Pembayaran</label>
+                        <select id="pos-payment" class="clay-input bg-white" onchange="togglePosPaymentFields()">
+                            <option value="Belum Lunas">Belum Lunas</option>
+                            <option value="DP">DP (Panjar)</option>
+                            <option value="Lunas">Lunas</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Metode Pembayaran</label>
+                        <select id="pos-payment-method" class="clay-input bg-white">
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer">Transfer Bank</option>
+                            <option value="Shopee">ShopeePay</option>
+                            <option value="Dana">DANA</option>
+                            <option value="Gopay">GoPay</option>
+                        </select>
+                    </div>
+
+                    <div id="pos-dp-container" class="hidden space-y-2 bg-white/50 p-3 rounded-xl border border-gray-200">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah Uang DP Dibayar</label>
+                            <input type="number" id="pos-dp-amount" class="clay-input" placeholder="Cth: 25000" oninput="calculateChange()">
+                        </div>
+                        <div class="text-xs text-gray-600 flex justify-between pt-1 font-medium">
+                            <span>Sisa Belum Bayar:</span>
+                            <span id="pos-sisa-display" class="font-bold text-red-600">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div id="pos-cash-container" class="space-y-2 bg-white/50 p-3 rounded-xl border border-gray-200">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Uang Diterima dari Pelanggan</label>
+                            <input type="number" id="pos-cash-amount" class="clay-input" placeholder="Cth: 100000" oninput="calculateChange()">
+                        </div>
+                        <div class="text-xs text-gray-600 flex justify-between pt-1 font-medium">
+                            <span>Uang Kembalian:</span>
+                            <span id="pos-change-display" class="font-bold text-green-600">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-save-trx" onclick="window.saveTransaction()" class="clay-btn clay-btn-primary w-full py-3 mt-4 text-lg">Simpan Transaksi</button>
+                    <button type="button" onclick="switchView('transactions', 'all')" class="clay-btn w-full py-2 mt-2 text-gray-600">Batal</button>
+                </div>
+            `;
+        }
+
+        window.togglePosPaymentFields = function() {
+            const payStatus = document.getElementById('pos-payment').value;
+            const dpContainer = document.getElementById('pos-dp-container');
+            const cashContainer = document.getElementById('pos-cash-container');
+            
+            if (payStatus === 'DP') {
+                dpContainer.classList.remove('hidden');
+                cashContainer.classList.add('hidden');
+            } else if (payStatus === 'Lunas') {
+                dpContainer.classList.add('hidden');
+                cashContainer.classList.remove('hidden');
+            } else {
+                dpContainer.classList.add('hidden');
+                cashContainer.classList.add('hidden');
+            }
+            calculateChange();
+        };
+
+        window.calculatePosTotal = function() {
+            const servEl = document.getElementById('pos-service');
+            const qty = parseFloat(document.getElementById('pos-qty').value) || 0;
+            let total = 0;
+            if (servEl && servEl.selectedIndex > 0) {
+                const price = parseFloat(servEl.options[servEl.selectedIndex].dataset.price) || 0;
+                total = price * qty;
+            }
+            const totalDisplay = document.getElementById('pos-total-display');
+            if(totalDisplay) totalDisplay.innerText = formatRp(total);
+            calculateChange();
+            return total;
+        };
+
+        window.calculateChange = function() {
+            const total = window.calculatePosTotal();
+            const payStatus = document.getElementById('pos-payment')?.value || 'Belum Lunas';
+            
+            if (payStatus === 'DP') {
+                const dpInput = parseFloat(document.getElementById('pos-dp-amount')?.value) || 0;
+                const sisa = Math.max(0, total - dpInput);
+                const sisaDisplay = document.getElementById('pos-sisa-display');
+                if (sisaDisplay) sisaDisplay.innerText = formatRp(sisa);
+            } else if (payStatus === 'Lunas') {
+                const cashInput = parseFloat(document.getElementById('pos-cash-amount')?.value) || 0;
+                const change = Math.max(0, cashInput - total);
+                const changeDisplay = document.getElementById('pos-change-display');
+                if (changeDisplay) changeDisplay.innerText = formatRp(change);
+            }
+        };
+
+        window.saveTransaction = async function() {
+            const custEl = document.getElementById('pos-customer');
+            const servEl = document.getElementById('pos-service');
+            const qtyEl = document.getElementById('pos-qty');
+            const payEl = document.getElementById('pos-payment');
+            const payMethodEl = document.getElementById('pos-payment-method');
+
+            if (!custEl || !servEl || !qtyEl || !payEl) {
+                showToast("Form tidak lengkap!", "⚠️");
+                return;
+            }
+
+            const custId = custEl.value;
+            const servId = servEl.value;
+            const qty = parseFloat(qtyEl.value);
+            const paymentStatus = payEl.value;
+            const paymentMethod = payMethodEl ? payMethodEl.value : 'Tunai';
+
+            if (!custId || !servId || isNaN(qty) || qty <= 0) {
+                showToast("Pilih pelanggan, layanan, dan jumlah yang benar!", "⚠️");
+                return;
+            }
+
+            const customer = window.appState.customers.find(c => c.id === custId);
+            const service = window.appState.services.find(s => s.id === servId);
+            
+            if (!customer || !service) {
+                showToast("Data pelanggan atau layanan tidak ditemukan", "❌");
+                return;
+            }
+
+            const total = service.price * qty;
+            let paidAmount = 0;
+            if (paymentStatus === 'Lunas') {
+                paidAmount = total;
+            } else if (paymentStatus === 'DP') {
+                paidAmount = parseFloat(document.getElementById('pos-dp-amount')?.value) || 0;
+                if (paidAmount <= 0) {
+                    showToast("Masukkan jumlah DP dengan benar!", "⚠️");
+                    return;
+                }
+            } else {
+                paidAmount = 0;
+            }
+
+            const trxData = {
+                customerId: custId,
+                customerName: customer.name,
+                serviceId: servId,
+                serviceName: `${service.name} (${service.category})`,
+                qty: qty,
+                total: total,
+                paidAmount: paidAmount,
+                status: 'Antrian',
+                paymentStatus: paymentStatus,
+                paymentMethod: paymentMethod
+            };
+
+            const btn = document.getElementById('btn-save-trx');
+            if (btn) {
+                btn.innerText = "Menyimpan...";
+                btn.disabled = true;
+            }
+
+            try {
+                await window.dbActions.addTransaction(trxData);
+                showToast("Transaksi Berhasil!", "✅");
+                switchView('transactions', 'all');
+            } catch (e) {
+                console.error(e);
+                showToast("Gagal menyimpan transaksi", "❌");
+                if (btn) {
+                    btn.innerText = "Simpan Transaksi";
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        function renderMasterData() {
+            return `
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    <button onclick="renderMasterContent('services')" class="clay-btn bg-white px-4 py-2 text-sm flex-shrink-0 font-bold text-indigo-600">👔 Layanan</button>
+                    <button onclick="renderMasterContent('customers')" class="clay-btn bg-white px-4 py-2 text-sm flex-shrink-0 font-bold text-green-600">👥 Pelanggan</button>
+                    <button onclick="renderMasterContent('employees')" class="clay-btn bg-white px-4 py-2 text-sm flex-shrink-0 font-bold text-orange-600">👷 Karyawan</button>
+                </div>
+                <div id="master-content"></div>
+            `;
+        }
+
+        window.renderMasterContent = function(type) {
+            setTimeout(() => {
+                const container = document.getElementById('master-content');
+                if(!container) return;
+                
+                let html = '';
+                if (type === 'services') {
+                    html += `<button onclick="openFormModal('service')" class="clay-btn clay-btn-primary w-full py-2 mb-4">+ Tambah Layanan</button>`;
+                    if (window.appState.services.length === 0) {
+                        html += `<div class="text-center text-gray-400 py-6 text-sm">Belum ada layanan</div>`;
+                    }
+                    window.appState.services.forEach(s => {
+                        html += `
+                            <div class="clay-card p-4 mb-3 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold">${s.name}</h4>
+                                    <p class="text-xs text-gray-500">${s.category}</p>
+                                    <p class="text-sm font-semibold text-indigo-600 mt-1">${formatRp(s.price)}</p>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="openFormModal('service', '${s.id}')" class="p-2 bg-blue-100 rounded-lg text-blue-600 text-xs font-bold shadow-sm">Edit</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else if (type === 'customers') {
+                    html += `<button onclick="openFormModal('customer')" class="clay-btn clay-btn-primary w-full py-2 mb-4">+ Tambah Pelanggan</button>`;
+                    if (window.appState.customers.length === 0) {
+                        html += `<div class="text-center text-gray-400 py-6 text-sm">Belum ada pelanggan</div>`;
+                    }
+                    window.appState.customers.forEach(c => {
+                        html += `
+                            <div class="clay-card p-4 mb-3 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold">${c.name}</h4>
+                                    <p class="text-xs text-gray-500">📞 ${c.phone || '-'}</p>
+                                    <p class="text-xs text-gray-500 mt-1">📍 ${c.address || '-'}</p>
+                                </div>
+                                <div>
+                                    <button onclick="openFormModal('customer', '${c.id}')" class="p-2 bg-blue-100 rounded-lg text-blue-600 text-xs font-bold shadow-sm">Edit</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else if (type === 'employees') {
+                    html += `<button onclick="openFormModal('employee')" class="clay-btn clay-btn-primary w-full py-2 mb-4">+ Tambah Karyawan</button>`;
+                    if (window.appState.employees.length === 0) {
+                        html += `<div class="text-center text-gray-400 py-6 text-sm">Belum ada karyawan</div>`;
+                    }
+                    window.appState.employees.forEach(e => {
+                        html += `
+                            <div class="clay-card p-4 mb-3 flex justify-between items-center">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-3xl icon-3d">🧑‍🔧</span>
+                                    <div>
+                                        <h4 class="font-bold">${e.name}</h4>
+                                        <span class="status-badge bg-orange-100 text-orange-700">${e.role}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button onclick="openFormModal('employee', '${e.id}')" class="p-2 bg-blue-100 rounded-lg text-blue-600 text-xs font-bold shadow-sm">Edit</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML = html;
+            }, 0);
+        };
+
+        const originalRenderMasterData = renderMasterData;
+        renderMasterData = function() {
+            setTimeout(() => window.renderMasterContent('services'), 50);
+            return originalRenderMasterData();
+        };
+
+        function renderSettings() {
+            const s = window.appState.settings;
+            return `
+                <div class="clay-card p-5 space-y-4 mb-6">
+                    <h3 class="font-bold text-gray-800 text-base border-b border-gray-200 pb-2">🏪 Profil Outlet</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Nama Outlet</label>
+                        <input type="text" id="set-outlet-name" class="clay-input text-sm" value="${s.outletName}">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Alamat Outlet</label>
+                        <textarea id="set-outlet-address" class="clay-input text-sm" rows="2">${s.outletAddress}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Nomor Telepon / WhatsApp</label>
+                        <input type="text" id="set-outlet-phone" class="clay-input text-sm" value="${s.outletPhone}">
+                    </div>
+                </div>
+
+                <div class="clay-card p-5 space-y-4 mb-6">
+                    <h3 class="font-bold text-gray-800 text-base border-b border-gray-200 pb-2">🧾 Pengaturan Cetak Nota / Struk</h3>
+                    
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="set-hide-outlet" class="w-4 h-4 accent-indigo-600" ${s.hideOutletName ? 'checked' : ''} onchange="updateSettingsLive()">
+                            <span class="text-xs font-semibold text-gray-700">Sembunyikan Nama Outlet di Struk</span>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="set-hide-logo" class="w-4 h-4 accent-indigo-600" ${s.hideLogo ? 'checked' : ''} onchange="updateSettingsLive()">
+                            <span class="text-xs font-semibold text-gray-700">Sembunyikan Logo / Icon di Struk</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="set-show-trx" class="w-4 h-4 accent-indigo-600" ${s.showTrxNumber ? 'checked' : ''} onchange="updateSettingsLive()">
+                            <span class="text-xs font-semibold text-gray-700">Tampilkan No Transaksi / ID Order</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="set-show-service" class="w-4 h-4 accent-indigo-600" ${s.showServiceDetail ? 'checked' : ''} onchange="updateSettingsLive()">
+                            <span class="text-xs font-semibold text-gray-700">Tampilkan Detail Layanan & Kategori</span>
+                        </label>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">👁️ Live Preview Nota Struk:</label>
+                        <div id="settings-receipt-preview" class="bg-white p-4 rounded-xl border border-dashed border-gray-400 font-mono text-[11px] text-gray-800 shadow-inner">
+                            <!-- Preview injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="saveSettings()" class="clay-btn clay-btn-primary w-full py-3 text-lg mb-8">💾 Simpan Pengaturan</button>
+            `;
+        }
+
+        window.updateSettingsLive = function() {
+            const previewContainer = document.getElementById('settings-receipt-preview');
+            if (!previewContainer) return;
+
+            const name = document.getElementById('set-outlet-name').value;
+            const address = document.getElementById('set-outlet-address').value;
+            const phone = document.getElementById('set-outlet-phone').value;
+            const hideOutlet = document.getElementById('set-hide-outlet').checked;
+            const hideLogo = document.getElementById('set-hide-logo').checked;
+            const showTrx = document.getElementById('set-show-trx').checked;
+            const showService = document.getElementById('set-show-service').checked;
+
+            let html = '';
+            if (!hideLogo) html += `<div style="text-align: center; font-size: 16px; margin-bottom: 2px;">🧺</div>`;
+            if (!hideOutlet) {
+                html += `
+                    <div style="text-align: center; margin-bottom: 6px;">
+                        <div style="font-weight: bold; font-size: 13px;">${name}</div>
+                        <div>${address}</div>
+                        <div>Telp: ${phone}</div>
+                    </div>
+                    <div style="border-bottom: 1px dashed black; margin-bottom: 5px;"></div>
+                `;
+            }
+            if (showTrx) html += `<div>No. Order: TRX-${Date.now().toString().slice(-6)}</div>`;
+            html += `
+                <div>Tgl: 27/09/2026 12:50</div>
+                <div>Plg: Budi Santoso</div>
+                <div style="border-bottom: 1px dashed black; margin-top: 5px; margin-bottom: 5px;"></div>
+                <div>Cuci Setrika Reguler</div>
+                <div>2.0 x ${formatRp(6000)} <span style="float:right">${formatRp(12000)}</span></div>
+                <div style="border-bottom: 1px dashed black; margin-top: 5px; margin-bottom: 5px;"></div>
+                <div style="font-weight: bold;">
+                    <span>TOTAL</span>
+                    <span style="float: right;">${formatRp(12000)}</span>
+                </div>
+                <div style="text-align: center; font-size: 10px; margin-top: 8px;">
+                    <p style="margin:0;">Terima Kasih</p>
+                </div>
+            `;
+            previewContainer.innerHTML = html;
+        };
+
+        window.setTimeout(() => {
+            if (window.appState.currentView === 'settings') updateSettingsLive();
+        }, 100);
+
+        const originalSwitchView = window.switchView;
+        window.switchView = function(viewName, filter = 'all') {
+            originalSwitchView(viewName, filter);
+            if (viewName === 'settings') {
+                setTimeout(updateSettingsLive, 50);
+            }
+        };
+
+        window.saveSettings = function() {
+            const name = document.getElementById('set-outlet-name').value;
+            const address = document.getElementById('set-outlet-address').value;
+            const phone = document.getElementById('set-outlet-phone').value;
+            const hideOutlet = document.getElementById('set-hide-outlet').checked;
+            const hideLogo = document.getElementById('set-hide-logo').checked;
+            const showTrx = document.getElementById('set-show-trx').checked;
+            const showService = document.getElementById('set-show-service').checked;
+
+            window.appState.settings = {
+                outletName: name,
+                outletAddress: address,
+                outletPhone: phone,
+                hideOutletName: hideOutlet,
+                hideLogo: hideLogo,
+                showTrxNumber: showTrx,
+                showServiceDetail: showService
+            };
+
+            localStorage.setItem('laundry_settings', JSON.stringify(window.appState.settings));
+            showToast("Pengaturan Disimpan!", "✅");
+        };
+
+        function renderReports() {
+            const trxs = window.appState.transactions;
+            const activeTrxs = trxs.filter(t => t.status !== 'Batal');
+            
+            const omset = activeTrxs.reduce((a, b) => a + (Number(b.paidAmount) || (b.paymentStatus === 'Lunas' ? Number(b.total) : 0) || 0), 0);
+            const masuk = trxs.length;
+            const lunas = trxs.filter(t => t.paymentStatus === 'Lunas').length;
+            const dpCount = trxs.filter(t => t.paymentStatus === 'DP').length;
+            const belumLunas = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas').length;
+            const batal = trxs.filter(t => t.status === 'Batal').length;
+
+            return `
+                <div class="card-3d-green p-6 mb-6 text-center">
+                    <h3 class="text-sm font-semibold opacity-90 mb-1">Total Keuangan Diterima</h3>
+                    <h2 class="text-3xl font-bold">${formatRp(omset)}</h2>
+                    <p class="text-xs opacity-80 mt-1">Dari total omset seluruh order aktif</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('masuk')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">📥</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Transaksi Masuk</span>
+                                <span class="text-[10px] text-indigo-600 font-semibold">Klik untuk lihat rincian & filter</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold">${masuk}</span>
+                    </div>
+
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('lunas')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">✅</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Transaksi Lunas</span>
+                                <span class="text-[10px] text-green-600 font-semibold">Klik untuk lihat rincian</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-green-600">${lunas}</span>
+                    </div>
+
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('dp')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">💳</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Transaksi DP (Panjar)</span>
+                                <span class="text-[10px] text-orange-600 font-semibold">Klik untuk lihat rincian</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-orange-500">${dpCount}</span>
+                    </div>
+
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('belum')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">⏳</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Belum Lunas</span>
+                                <span class="text-[10px] text-red-500 font-semibold">Klik untuk lihat rincian</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-red-500">${belumLunas}</span>
+                    </div>
+
+                    <div class="clay-card p-4 flex justify-between items-center cursor-pointer hover:bg-white/40 transition-colors" onclick="openReportDetailModal('batal')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl icon-3d">❌</span>
+                            <div>
+                                <span class="font-bold text-gray-700 block">Transaksi Batal</span>
+                                <span class="text-[10px] text-gray-500 font-semibold">Klik untuk lihat rincian</span>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-red-500">${batal}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.openReportDetailModal = function(filterType) {
+            const modal = document.getElementById('form-modal');
+            const content = document.getElementById('form-modal-content');
+            const body = document.getElementById('modal-body');
+            const title = document.getElementById('modal-title');
+            const saveBtn = document.getElementById('modal-save-btn');
+            
+            saveBtn.style.display = 'none';
+            title.innerText = 'Rincian Laporan Transaksi';
+
+            const trxs = window.appState.transactions;
+            
+            let filtered = trxs;
+            if (filterType === 'lunas') filtered = trxs.filter(t => t.paymentStatus === 'Lunas');
+            else if (filterType === 'dp') filtered = trxs.filter(t => t.paymentStatus === 'DP');
+            else if (filterType === 'belum') filtered = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas');
+            else if (filterType === 'batal') filtered = trxs.filter(t => t.status === 'Batal');
+
+            let listHtml = `
+                <div class="space-y-3 mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">📅 Dari Tanggal</label>
+                        <input type="date" id="report-start-date" class="clay-input text-xs" onchange="filterReportList('${filterType}')">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">📅 Sampai Tanggal</label>
+                        <input type="date" id="report-end-date" class="clay-input text-xs" onchange="filterReportList('${filterType}')">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="text-xs font-bold text-gray-600 block mb-1">Status Pembayaran</label>
+                            <select id="report-filter-pay" class="clay-input text-xs bg-white" onchange="filterReportList('${filterType}')">
+                                <option value="all">Semua Status</option>
+                                <option value="Lunas">Lunas</option>
+                                <option value="DP">DP</option>
+                                <option value="Belum Lunas">Belum Lunas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-600 block mb-1">Metode Bayar</label>
+                            <select id="report-filter-method" class="clay-input text-xs bg-white" onchange="filterReportList('${filterType}')">
+                                <option value="all">Semua Metode</option>
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="Shopee">ShopeePay</option>
+                                <option value="Dana">DANA</option>
+                                <option value="Gopay">GoPay</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-3 max-h-[45vh] overflow-y-auto" id="report-items-container">
+            `;
+
+            if (filtered.length === 0) {
+                listHtml += `<div class="text-center text-gray-400 py-6 text-sm">Tidak ada transaksi</div>`;
+            } else {
+                filtered.forEach(t => {
+                    const payStatus = t.paymentStatus || 'Belum Lunas';
+                    const payMethod = t.paymentMethod || 'Tunai';
+                    const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
+                    listHtml += `
+                        <div class="bg-white/90 p-3 rounded-xl border border-gray-200 text-xs space-y-1 shadow-sm">
+                            <div class="flex justify-between font-bold text-gray-800">
+                                <span>${t.customerName}</span>
+                                <span class="text-indigo-600">${formatRp(t.total)}</span>
+                            </div>
+                            <div class="text-gray-500">${t.serviceName} (${t.qty}) • ${formatDate(t.createdAt)}</div>
+                            <div class="flex justify-between items-center pt-1 border-t border-gray-100">
+                                <span class="status-badge bg-gray-100 text-gray-700">${t.status}</span>
+                                <span class="font-semibold text-green-600">Bayar: ${formatRp(paid)} (${payStatus} / ${payMethod})</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            listHtml += `</div>`;
+
+            body.innerHTML = listHtml;
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        };
+
+        window.filterReportList = function(filterType) {
+            const startDate = document.getElementById('report-start-date').value;
+            const endDate = document.getElementById('report-end-date').value;
+            const payFilter = document.getElementById('report-filter-pay').value;
+            const methodFilter = document.getElementById('report-filter-method').value;
+            const container = document.getElementById('report-items-container');
+            if (!container) return;
+
+            let trxs = window.appState.transactions;
+            if (filterType === 'lunas') trxs = trxs.filter(t => t.paymentStatus === 'Lunas');
+            else if (filterType === 'dp') trxs = trxs.filter(t => t.paymentStatus === 'DP');
+            else if (filterType === 'belum') trxs = trxs.filter(t => !t.paymentStatus || t.paymentStatus === 'Belum Lunas');
+            else if (filterType === 'batal') trxs = trxs.filter(t => t.status === 'Batal');
+
+            if (payFilter !== 'all') {
+                trxs = trxs.filter(t => (t.paymentStatus || 'Belum Lunas') === payFilter);
+            }
+
+            if (methodFilter !== 'all') {
+                trxs = trxs.filter(t => (t.paymentMethod || 'Tunai') === methodFilter);
+            }
+
+            if (startDate || endDate) {
+                trxs = trxs.filter(t => {
+                    if (!t.createdAt) return false;
+                    const d = new Date(t.createdAt);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    const formatted = `${yyyy}-${mm}-${dd}`;
+
+                    if (startDate && formatted < startDate) return false;
+                    if (endDate && formatted > endDate) return false;
+                    return true;
+                });
+            }
+
+            let html = '';
+            if (trxs.length === 0) {
+                html = `<div class="text-center text-gray-400 py-6 text-sm">Tidak ada transaksi yang cocok dengan filter</div>`;
+            } else {
+                trxs.forEach(t => {
+                    const payStatus = t.paymentStatus || 'Belum Lunas';
+                    const payMethod = t.paymentMethod || 'Tunai';
+                    const paid = Number(t.paidAmount) || (payStatus === 'Lunas' ? Number(t.total) : 0);
+                    html += `
+                        <div class="bg-white/90 p-3 rounded-xl border border-gray-200 text-xs space-y-1 shadow-sm">
+                            <div class="flex justify-between font-bold text-gray-800">
+                                <span>${t.customerName}</span>
+                                <span class="text-indigo-600">${formatRp(t.total)}</span>
+                            </div>
+                            <div class="text-gray-500">${t.serviceName} (${t.qty}) • ${formatDate(t.createdAt)}</div>
+                            <div class="flex justify-between items-center pt-1 border-t border-gray-100">
+                                <span class="status-badge bg-gray-100 text-gray-700">${t.status}</span>
+                                <span class="font-semibold text-green-600">Bayar: ${formatRp(paid)} (${payStatus} / ${payMethod})</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        };
+
+        function openFormModal(type, id = null) {
+            const modal = document.getElementById('form-modal');
+            const content = document.getElementById('form-modal-content');
+            const body = document.getElementById('modal-body');
+            const title = document.getElementById('modal-title');
+            const saveBtn = document.getElementById('modal-save-btn');
+            
+            saveBtn.style.display = 'block';
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+
+            let html = '';
+
+            if (type === 'service') {
+                title.innerText = id ? 'Edit Layanan' : 'Tambah Layanan';
+                let data = id ? window.appState.services.find(s => s.id === id) : { name: '', category: 'Kiloan', price: '' };
+                
+                const uniqueCats = [...new Set(window.appState.services.map(s => s.category))];
+                if (!uniqueCats.includes('Kiloan')) uniqueCats.push('Kiloan');
+                if (!uniqueCats.includes('Satuan')) uniqueCats.push('Satuan');
+                if (!uniqueCats.includes('Karpet/Bedcover')) uniqueCats.push('Karpet/Bedcover');
+                
+                const catOptions = uniqueCats.map(c => `<option value="${c}"></option>`).join('');
+
+                html = `
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">Kategori (Ketik bebas / Pilih)</label>
+                        <input list="cat-suggestions" id="f-cat" class="clay-input mb-1" value="${data.category}" placeholder="Cth: Kiloan, Pcs, Meter...">
+                        <datalist id="cat-suggestions">
+                            ${catOptions}
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">Nama Layanan</label>
+                        <input type="text" id="f-name" class="clay-input mb-2" value="${data.name}" placeholder="Cth: Cuci Setrika">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">Harga (Angka saja)</label>
+                        <input type="number" id="f-price" class="clay-input mb-2" value="${data.price}" placeholder="Cth: 6000">
+                    </div>
+                `;
+                saveBtn.onclick = async () => {
+                    const nData = {
+                        name: document.getElementById('f-name').value,
+                        category: document.getElementById('f-cat').value,
+                        price: Number(document.getElementById('f-price').value)
+                    };
+                    if(!nData.name || !nData.category || isNaN(nData.price)) {
+                        showToast("Isi semua data dengan benar", "⚠️");
+                        return;
+                    }
+                    const originalText = saveBtn.innerText;
+                    saveBtn.innerText = "Menyimpan...";
+                    saveBtn.disabled = true;
+                    try {
+                        if(id) await window.dbActions.updateService(id, nData);
+                        else await window.dbActions.addService(nData);
+                        closeModal(); 
+                        showToast("Layanan disimpan", "✅");
+                        window.renderMasterContent('services');
+                    } catch(e) {
+                        showToast("Terjadi kesalahan", "❌");
+                    } finally {
+                        saveBtn.innerText = originalText;
+                        saveBtn.disabled = false;
+                    }
+                };
+            } else if (type === 'customer') {
+                title.innerText = id ? 'Edit Pelanggan' : 'Tambah Pelanggan';
+                let data = id ? window.appState.customers.find(c => c.id === id) : { name: '', phone: '', address: '' };
+                html = `
+                    <div><label class="text-xs font-bold text-gray-500">Nama</label><input type="text" id="f-name" class="clay-input" value="${data.name}" placeholder="Nama pelanggan"></div>
+                    <div><label class="text-xs font-bold text-gray-500">No HP / WA</label><input type="text" id="f-phone" class="clay-input" value="${data.phone || ''}" placeholder="08..."></div>
+                    <div><label class="text-xs font-bold text-gray-500">Alamat</label><textarea id="f-address" class="clay-input" rows="2">${data.address || ''}</textarea></div>
+                `;
+                saveBtn.onclick = async () => {
+                    const nData = {
+                        name: document.getElementById('f-name').value,
+                        phone: document.getElementById('f-phone').value,
+                        address: document.getElementById('f-address').value
+                    };
+                    if(!nData.name) return showToast("Nama wajib diisi", "⚠️");
+                    const originalText = saveBtn.innerText;
+                    saveBtn.innerText = "Menyimpan...";
+                    saveBtn.disabled = true;
+                    try {
+                        if(id) await window.dbActions.updateCustomer(id, nData);
+                        else await window.dbActions.addCustomer(nData);
+                        closeModal(); 
+                        showToast("Pelanggan disimpan", "✅");
+                        window.renderMasterContent('customers');
+                    } catch(e) {
+                        showToast("Terjadi kesalahan", "❌");
+                    } finally {
+                        saveBtn.innerText = originalText;
+                        saveBtn.disabled = false;
+                    }
+                };
+            } else if (type === 'employee') {
+                title.innerText = id ? 'Edit Karyawan' : 'Tambah Karyawan';
+                let data = id ? window.appState.employees.find(e => e.id === id) : { name: '', role: 'Tukang Cuci' };
+                html = `
+                    <div><label class="text-xs font-bold text-gray-500">Nama</label><input type="text" id="f-name" class="clay-input" value="${data.name}" placeholder="Nama karyawan"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500">Posisi</label>
+                        <select id="f-role" class="clay-input bg-white">
+                            <option value="Tukang Cuci" ${data.role === 'Tukang Cuci' ? 'selected' : ''}>Tukang Cuci</option>
+                            <option value="Tukang Setrika" ${data.role === 'Tukang Setrika' ? 'selected' : ''}>Tukang Setrika</option>
+                            <option value="Kasir / Admin" ${data.role === 'Kasir / Admin' ? 'selected' : ''}>Kasir / Admin</option>
+                            <option value="Kurir" ${data.role === 'Kurir' ? 'selected' : ''}>Kurir</option>
+                        </select>
+                    </div>
+                `;
+                saveBtn.onclick = async () => {
+                    const nData = {
+                        name: document.getElementById('f-name').value,
+                        role: document.getElementById('f-role').value
+                    };
+                    if(!nData.name) return showToast("Nama wajib diisi", "⚠️");
+                    const originalText = saveBtn.innerText;
+                    saveBtn.innerText = "Menyimpan...";
+                    saveBtn.disabled = true;
+                    try {
+                        if(id) await window.dbActions.updateEmployee(id, nData);
+                        else await window.dbActions.addEmployee(nData);
+                        closeModal(); 
+                        showToast("Karyawan disimpan", "✅");
+                        window.renderMasterContent('employees');
+                    } catch(e) {
+                        showToast("Terjadi kesalahan", "❌");
+                    } finally {
+                        saveBtn.innerText = originalText;
+                        saveBtn.disabled = false;
+                    }
+                };
+            }
+
+            body.innerHTML = html;
+        }
+
+        function closeModal() {
+            const content = document.getElementById('form-modal-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('form-modal').classList.add('hidden');
+            }, 300);
+        }
+
+        window.openStatusModal = function(trxId) {
+            const trx = window.appState.transactions.find(t => t.id === trxId);
+            if(!trx) return;
+
+            const modal = document.getElementById('form-modal');
+            const content = document.getElementById('form-modal-content');
+            const body = document.getElementById('modal-body');
+            const title = document.getElementById('modal-title');
+            const saveBtn = document.getElementById('modal-save-btn');
+            
+            saveBtn.style.display = 'block';
+            title.innerText = 'Update Proses & Pembayaran';
+            
+            const statuses = ['Antrian', 'Proses', 'Siap Ambil', 'Selesai', 'Batal'];
+            let statOptions = statuses.map(s => `<option value="${s}" ${trx.status === s ? 'selected' : ''}>${s}</option>`).join('');
+            
+            const payStatuses = ['Belum Lunas', 'DP', 'Lunas'];
+            let payOptions = payStatuses.map(p => `<option value="${p}" ${trx.paymentStatus === p ? 'selected' : ''}>${p}</option>`).join('');
+
+            const currentPaid = Number(trx.paidAmount) || (trx.paymentStatus === 'Lunas' ? Number(trx.total) : 0);
+
+            body.innerHTML = `
+                <div class="mb-4 bg-gray-100 p-3 rounded-lg text-sm space-y-1">
+                    <strong>Pelanggan:</strong> ${trx.customerName}<br>
+                    <strong>Layanan:</strong> ${trx.serviceName} (${trx.qty})<br>
+                    <strong>Total Tagihan:</strong> ${formatRp(trx.total)}
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Ubah Status Pengerjaan</label>
+                    <select id="s-status" class="clay-input bg-white">${statOptions}</select>
+                </div>
+                <div class="mt-3">
+                    <label class="text-xs font-bold text-gray-500">Status Pembayaran</label>
+                    <select id="s-pay" class="clay-input bg-white" onchange="toggleModalPaymentFields('${trx.total}')">${payOptions}</select>
+                </div>
+                <div class="mt-3" id="modal-paid-container">
+                    <label class="text-xs font-bold text-gray-500">Jumlah Uang Telah Dibayar (Rp)</label>
+                    <input type="number" id="s-paid" class="clay-input" value="${currentPaid}">
+                </div>
+            `;
+
+            saveBtn.onclick = async () => {
+                const newStatus = document.getElementById('s-status').value;
+                const newPay = document.getElementById('s-pay').value;
+                const newPaidAmount = parseFloat(document.getElementById('s-paid').value) || 0;
+                
+                if(newStatus === 'Batal' && trx.status !== 'Batal') {
+                    openConfirm('Batalkan Transaksi?', 'Jika dibatalkan, status akan berubah menjadi batal.', async () => {
+                        await window.dbActions.updateTransaction(trxId, { status: newStatus, paymentStatus: newPay, paidAmount: newPaidAmount });
+                        closeModal(); 
+                        showToast("Status Diupdate", "✅");
+                    });
+                } else {
+                    const originalText = saveBtn.innerText;
+                    saveBtn.innerText = "Updating...";
+                    saveBtn.disabled = true;
+                    try {
+                        await window.dbActions.updateTransaction(trxId, { status: newStatus, paymentStatus: newPay, paidAmount: newPaidAmount });
+                        closeModal();
+                        showToast("Status Diupdate", "✅");
+                    } catch (e) {
+                        showToast("Gagal update", "❌");
+                    } finally {
+                        saveBtn.innerText = originalText;
+                        saveBtn.disabled = false;
+                    }
+                }
+            };
+
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        };
+
+        window.toggleModalPaymentFields = function(totalVal) {
+            const payVal = document.getElementById('s-pay').value;
+            const paidInput = document.getElementById('s-paid');
+            if (payVal === 'Lunas') {
+                paidInput.value = totalVal;
+            }
+        };
+
+        function openConfirm(title, msg, onYes) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            yesBtn.onclick = () => {
+                onYes();
+                closeConfirm();
+            };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        window.printReceipt = function(trxId) {
+            const trx = window.appState.transactions.find(t => t.id === trxId);
+            if(!trx) return;
+
+            const s = window.appState.settings;
+            const printArea = document.getElementById('print-area');
+            const d = new Date(trx.createdAt || Date.now());
+            const payStatus = trx.paymentStatus || 'Belum Lunas';
+            const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
+            const sisa = Math.max(0, Number(trx.total) - paid);
+            
+            let html = '';
+            if (!s.hideLogo) {
+                html += `<div style="text-align: center; margin-bottom: 5px; font-size: 16px;">🧺</div>`;
+            }
+            if (!s.hideOutletName) {
+                html += `
+                    <div style="text-align: center; margin-bottom: 8px;">
+                        <h2 style="margin:0; font-size: 15px; font-weight: bold;">${s.outletName}</h2>
+                        <p style="margin:0; font-size: 10px;">${s.outletAddress}</p>
+                        <p style="margin:0; font-size: 10px;">Telp: ${s.outletPhone}</p>
+                    </div>
+                    <div style="border-bottom: 1px dashed black; margin-bottom: 5px;"></div>
+                `;
+            }
+
+            html += `<div style="font-size: 11px; margin-bottom: 5px;">`;
+            if (s.showTrxNumber) {
+                html += `<div>No: TRX-${trx.id.slice(-6).toUpperCase()}</div>`;
+            }
+            html += `
+                    <div>Tgl: ${d.toLocaleDateString('id-ID')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}</div>
+                    <div>Plg: ${trx.customerName}</div>
+                </div>
+                <div style="border-bottom: 1px dashed black; margin-bottom: 5px;"></div>
+                <table style="width: 100%; font-size: 11px;">
+                    <tr>
+                        <td colspan="2">${trx.serviceName}</td>
+                    </tr>
+                    <tr>
+                        <td>${trx.qty} x</td>
+                        <td style="text-align: right;">${formatRp(trx.total)}</td>
+                    </tr>
+                </table>
+                <div style="border-bottom: 1px dashed black; margin-top: 5px; margin-bottom: 5px;"></div>
+                <table style="width: 100%; font-size: 11px; font-weight: bold;">
+                    <tr>
+                        <td>TOTAL</td>
+                        <td style="text-align: right;">${formatRp(trx.total)}</td>
+                    </tr>
+                    <tr>
+                        <td>STATUS</td>
+                        <td style="text-align: right;">${payStatus.toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                        <td>DIBAYAR</td>
+                        <td style="text-align: right;">${formatRp(paid)}</td>
+                    </tr>
+                    ${sisa > 0 ? `<tr><td>SISA</td><td style="text-align: right;">${formatRp(sisa)}</td></tr>` : ''}
+                </table>
+                <div style="border-bottom: 1px dashed black; margin-top: 5px; margin-bottom: 10px;"></div>
+                <div style="text-align: center; font-size: 10px;">
+                    <p style="margin:0;">Terima Kasih</p>
+                    <p style="margin:0;">Pakaian bersih hati gembira</p>
+                </div>
+            `;
+            
+            printArea.innerHTML = html;
+            window.print();
+        };
+
+    </script>
+</body>
+</html>

@@ -978,13 +978,12 @@
             }
         };
 
-        window.saveTransaction = async function() {
+                window.saveTransaction = async function() {
             const customerId = document.getElementById('pos-customer').value;
             if (!customerId) return showToast("Pilih pelanggan dulu", "⚠️");
             if (window.posCart.length === 0) return showToast("Tambahkan minimal 1 layanan", "⚠️");
 
             const customer = window.appState.customers.find(c => c.id === customerId);
-            const combinedServiceNames = window.posCart.map(item => item.name).join(', ');
             const totalQty = window.posCart.reduce((sum, item) => sum + item.qty, 0);
             const grandTotal = window.posCart.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -998,8 +997,9 @@
             const trxData = {
                 customerId: customerId,
                 customerName: customer.name,
-                serviceId: window.posCart[0].id, 
-                serviceName: combinedServiceNames,
+                // SIMPAN RINCIAN ITEM SECARA UTUH
+                items: window.posCart, 
+                serviceName: window.posCart.length > 1 ? 'Multi Layanan' : window.posCart[0].name,
                 qty: totalQty,
                 total: grandTotal,
                 status: 'Antrian',

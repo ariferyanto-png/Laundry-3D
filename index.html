@@ -610,24 +610,35 @@
                 }
         
             
-
         function renderPOS() {
             const customers = window.appState.customers;
             const services = window.appState.services;
 
-            let custOptions = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             let servOptions = services.map(s => `<option value="${s.id}" data-price="${s.price}">${s.name} - ${s.category} (${formatRp(s.price)})</option>`).join('');
 
             return `
                 <div class="clay-card p-5 space-y-4">
-                    <div>
+                    <!-- CUSTOM DROPDOWN PENCARIAN PELANGGAN -->
+                    <div class="relative">
                         <label class="block text-sm font-semibold text-gray-600 mb-1">Pelanggan</label>
-                        <select id="pos-customer" class="clay-input mb-1">
-                            <option value="">-- Pilih Pelanggan --</option>
-                            ${custOptions}
-                        </select>
+                        
+                        <!-- Input Pencarian -->
+                        <div class="relative">
+                            <input type="text" id="pos-customer-search" class="clay-input" placeholder="🔍 Cari nama pelanggan..." onfocus="toggleCustomerDropdown(true)" oninput="filterCustomerDropdown(this.value)">
+                            <button onclick="toggleCustomerDropdown(false)" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">❌</button>
+                        </div>
+                        
+                        <!-- ID Pelanggan Tersembunyi (Untuk Disimpan) -->
+                        <input type="hidden" id="pos-customer">
+
+                        <!-- Daftar Pelanggan Dropdown -->
+                        <div id="customer-dropdown-list" class="hidden absolute z-50 w-full mt-1 bg-[#e0e5ec] rounded-xl border border-gray-300 shadow-xl max-h-48 overflow-y-auto">
+                            <!-- Daftar diisi oleh JavaScript -->
+                        </div>
+
                         <button onclick="openFormModal('customer')" class="text-xs text-indigo-600 font-bold flex items-center gap-1 mt-2 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 shadow-sm active:bg-indigo-100"><span class="text-lg leading-none">+</span> Tambah Pelanggan Baru</button>
                     </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-600 mb-1">Layanan</label>
                         <select id="pos-service" class="clay-input" onchange="calculatePosTotal()">
@@ -692,6 +703,7 @@
                 </div>
             `;
         }
+
 
         window.togglePosPaymentFields = function() {
             const payStatus = document.getElementById('pos-payment').value;

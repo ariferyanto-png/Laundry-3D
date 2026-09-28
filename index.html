@@ -2084,7 +2084,7 @@
             }
         };
 
-                window.openTransactionDetailModal = function(trxId) {
+                        window.openTransactionDetailModal = function(trxId) {
             const trx = window.appState.transactions.find(t => t.id === trxId);
             if (!trx) return;
 
@@ -2096,6 +2096,26 @@
             const payMethod = trx.paymentMethod || 'Tunai';
             const paid = Number(trx.paidAmount) || (payStatus === 'Lunas' ? Number(trx.total) : 0);
             const sisa = Math.max(0, Number(trx.total) - paid);
+
+            // MENAMPILKAN RINCIAN MULTI-LAYANAN
+            let itemsHtml = '';
+            if (trx.items && trx.items.length > 0) {
+                trx.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="flex justify-between text-xs py-1">
+                            <span class="text-gray-600">- ${item.name} (${item.qty})</span>
+                            <span>${formatRp(item.subtotal)}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                itemsHtml = `
+                    <div class="flex justify-between text-xs py-1">
+                        <span class="text-gray-600">- ${trx.serviceName} (${trx.qty})</span>
+                        <span>${formatRp(trx.total)}</span>
+                    </div>
+                `;
+            }
 
             let html = `
                 <div class="space-y-2">
@@ -2111,34 +2131,35 @@
                         <span class="font-bold text-gray-600">Pelanggan:</span>
                         <span class="font-bold">${trx.customerName}</span>
                     </div>
-                    <div class="flex justify-between border-b pb-2">
-                        <span class="font-bold text-gray-600">Layanan:</span>
-                        <span>${trx.serviceName} (${trx.qty})</span>
+                    
+                    <!-- DAFTAR RINCIAN CUCIAN -->
+                    <div class="border-b pb-2">
+                        <span class="font-bold text-gray-600 block mb-1">Rincian Layanan:</span>
+                        <div class="bg-gray-50 p-2 rounded-md border border-gray-200">
+                            ${itemsHtml}
+                        </div>
                     </div>
-                    <div class="flex justify-between border-b pb-2">
-                        <span class="font-bold text-gray-600">Status:</span>
+
+                    <div class="flex justify-between border-b pb-2 mt-2">
+                        <span class="font-bold text-gray-600">Status Cuci:</span>
                         <span class="font-bold text-indigo-600">${trx.status}</span>
-                    </div>
-                    <div class="flex justify-between border-b pb-2">
-                        <span class="font-bold text-gray-600">Metode Bayar:</span>
-                        <span>${payMethod}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="font-bold text-gray-600">Status Bayar:</span>
                         <span class="font-bold ${payStatus === 'Lunas' ? 'text-green-600' : 'text-orange-500'}">${payStatus}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="font-bold text-gray-600">Dibayar:</span>
+                        <span class="font-bold text-gray-600">Dibayar (${payMethod}):</span>
                         <span>${formatRp(paid)}</span>
                     </div>
                     ${sisa > 0 ? `
                         <div class="flex justify-between border-b pb-2">
-                            <span class="font-bold text-gray-600">Sisa:</span>
+                            <span class="font-bold text-gray-600">Sisa Tagihan:</span>
                             <span class="font-bold text-red-500">${formatRp(sisa)}</span>
                         </div>
                     ` : ''}
                     <div class="flex justify-between pt-2">
-                        <span class="font-bold text-gray-800 text-lg">Total Tagihan:</span>
+                        <span class="font-bold text-gray-800 text-lg">Total Akhir:</span>
                         <span class="font-bold text-indigo-700 text-lg">${formatRp(trx.total)}</span>
                     </div>
                 </div>
@@ -2150,6 +2171,7 @@
             setTimeout(() => content.classList.remove('translate-y-full'), 10);
         };
 
+//==============
         window.closeTrxDetailModal = function() {
             const content = document.getElementById('trx-detail-modal-content');
             content.classList.add('translate-y-full');

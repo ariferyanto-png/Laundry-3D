@@ -1754,7 +1754,7 @@
             }, 300);
         }
 
-        window.openStatusModal = function(trxId) {
+                window.openStatusModal = function(trxId) {
             const trx = window.appState.transactions.find(t => t.id === trxId);
             if(!trx) return;
 
@@ -1766,34 +1766,49 @@
             
             saveBtn.style.display = 'block';
             title.innerText = 'Update Proses & Pembayaran';
-            
+
             const statuses = ['Antrian', 'Proses', 'Siap Ambil', 'Selesai', 'Batal'];
             let statOptions = statuses.map(s => `<option value="${s}" ${trx.status === s ? 'selected' : ''}>${s}</option>`).join('');
-            
+
             const payStatuses = ['Belum Lunas', 'DP', 'Lunas'];
             let payOptions = payStatuses.map(p => `<option value="${p}" ${trx.paymentStatus === p ? 'selected' : ''}>${p}</option>`).join('');
 
             const currentPaid = Number(trx.paidAmount) || (trx.paymentStatus === 'Lunas' ? Number(trx.total) : 0);
 
+            // LOGIKA BARU: Menjabarkan rincian layanan untuk Pop-up Proses
+            let rincianHtml = '';
+            if (trx.items && trx.items.length > 0) {
+                rincianHtml = trx.items.map(item => `<div class="text-xs text-gray-700 ml-2">- ${item.name} (${item.qty})</div>`).join('');
+            } else {
+                rincianHtml = `<div class="text-xs text-gray-700 ml-2">- ${trx.serviceName} (${trx.qty})</div>`;
+            }
+
             body.innerHTML = `
-                <div class="mb-4 bg-gray-100 p-3 rounded-lg text-sm space-y-1">
-                    <strong>Pelanggan:</strong> ${trx.customerName}<br>
-                    <strong>Layanan:</strong> ${trx.serviceName} (${trx.qty})<br>
-                    <strong>Total Tagihan:</strong> ${formatRp(trx.total)}
+                <div class="mb-4 bg-gray-50 p-3 rounded-lg text-sm space-y-1 border border-gray-200">
+                    <div><strong>Pelanggan:</strong> ${trx.customerName}</div>
+                    <div class="py-1">
+                        <strong>Rincian Layanan:</strong>
+                        <div class="mt-1">${rincianHtml}</div>
+                    </div>
+                    <div class="pt-1 border-t border-gray-200"><strong>Total Tagihan:</strong> <span class="text-indigo-600">${formatRp(trx.total)}</span></div>
                 </div>
-                <div>
+                
+                <div class="mb-3">
                     <label class="text-xs font-bold text-gray-500">Ubah Status Pengerjaan</label>
                     <select id="s-status" class="clay-input bg-white">${statOptions}</select>
                 </div>
-                <div class="mt-3">
+                <div class="mb-3">
                     <label class="text-xs font-bold text-gray-500">Status Pembayaran</label>
                     <select id="s-pay" class="clay-input bg-white" onchange="toggleModalPaymentFields('${trx.total}')">${payOptions}</select>
                 </div>
-                <div class="mt-3" id="modal-paid-container">
+                <div class="mb-3" id="modal-paid-container">
                     <label class="text-xs font-bold text-gray-500">Jumlah Uang Telah Dibayar (Rp)</label>
                     <input type="number" id="s-paid" class="clay-input" value="${currentPaid}">
                 </div>
             `;
+
+            // (Biarkan fungsi saveBtn.onclick yang ada di bawahnya tetap seperti semula)
+
 
                         saveBtn.onclick = async () => {
                 const newStatus = document.getElementById('s-status').value;

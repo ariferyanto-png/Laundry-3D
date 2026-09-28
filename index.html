@@ -609,7 +609,7 @@
             return html;
                 }
         
-   //////////////////////////   
+   //===============
          // Inisialisasi Keranjang Kosong
         window.posCart = [];
 
@@ -817,7 +817,7 @@
             document.getElementById('customer-dropdown-list').classList.add('hidden');
         };
         
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//=====================
 
         
         window.togglePosPaymentFields = function() {
@@ -838,115 +838,196 @@
             calculateChange();
         };
 
-        window.calculatePosTotal = function() {
-            const servEl = document.getElementById('pos-service');
-            const qty = parseFloat(document.getElementById('pos-qty').value) || 0;
-            let total = 0;
-            if (servEl && servEl.selectedIndex > 0) {
-                const price = parseFloat(servEl.options[servEl.selectedIndex].dataset.price) || 0;
-                total = price * qty;
+        
+        // ==========================================
+        // SISTEM KERANJANG, HITUNG, & SIMPAN TRANSAKSI
+        // ==========================================
+        
+        window.posCart = []; // Memori keranjang cucian
+
+        window.addPosItem = function() {
+            const serviceId = document.getElementById('pos-service').value;
+            if (!serviceId) return showToast("Pilih layanan dulu", "⚠️");
+            
+            const service = window.appState.services.find(s => s.id === serviceId);
+            const qty = parseFloat(document.getElementById('pos-qty').value) || 1;
+            
+            const existingIndex = window.posCart.findIndex(item => item.id === serviceId);
+            if (existingIndex > -1) {
+                window.posCart[existingIndex].qty += qty;
+                window.posCart[existingIndex].subtotal = window.posCart[existingIndex].qty * window.posCart[existingIndex].price;
+            } else {
+                window.posCart.push({ id: service.id, name: service.name, price: Number(service.price), qty: qty, subtotal: qty * Number(service.price) });
             }
+            
+            document.getElementById('pos-service').value = '';
+            document.getElementById('pos-qty').value = '1';
+            renderPosCart();
+        };
+
+        window.removePosItem = function(index) {
+            window.posCart.splice(index, 1);
+            renderPosCart();
+        };
+
+        window.renderPosCart = function() {
+            const container = document.getElementById('pos-cart-items');
             const totalDisplay = document.getElementById('pos-total-display');
-            if(totalDisplay) totalDisplay.innerText = formatRp(total);
+            
+            if (window.posCart.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-gray-400 py-3 font-medium">Belum ada layanan ditambahkan</div>`;
+                totalDisplay.innerText = "Rp 0";
+                calculateChange();
+                return;
+            }
+
+            let html = '';
+            let grandTotal = 0;
+            
+            window.posCart.forEach((item, index) => {
+                grandTotal += item.subtotal;
+                html += `
+                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+                        <div class="flex-1">
+                            <div class="font-bold text-xs text-gray-800">${item.name}</div>
+                            <div class="text-[10px] text-gray-500 font-semibold">${item.qty} x ${formatRp(item.price)}</div>
+                        </div>
+                        <div class="font-bold text-indigo-600 text-xs mr-3">${formatRp(item.subtotal)}</div>
+                        <button onclick="removePosItem(${index})" class="text-red-500 font-bold bg-red-50 p-1 rounded-md text-[10px]">❌</button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            totalDisplay.innerText = formatRp(grandTotal);
             calculateChange();
-            return total;
+        };
+
+        window.toggleCustomerDropdown = function(show) {
+            const list = document.getElementById('customer-dropdown-list');
+            if (!list) return;
+            if (show) {
+                list.classList.remove('hidden');
+                filterCustomerDropdown(''); 
+            } else {
+                setTimeout(() => list.classList.add('hidden'), 200);
+            }
+        };
+
+        window.filterCustomerDropdown = function(query) {
+            const list = document.getElementById('customer-dropdown-list');
+            if (!list) return;
+
+            const customers = window.appState.customers;
+            const lowerQuery = query.toLowerCase();
+            const filtered = customers.filter(c => c.name.toLowerCase().includes(lowerQuery) || (c.phone && c.phone.includes(lowerQuery)));
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="p-3 text-sm text-gray-500 text-center">Pelanggan tidak ditemukan</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(c => {
+                html += `
+                    <div class="p-3 border-b border-gray-300 hover:bg-white/50 cursor-pointer transition-colors" onclick="selectCustomerForPos('${c.id}', '${c.name.replace(/'/g, "\\'")}')">
+                        <div class="font-bold text-gray-800 text-sm">${c.name}</div>
+                        <div class="text-xs text-gray-500">${c.phone || '-'}</div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        };
+
+        window.selectCustomerForPos = function(id, name) {
+            document.getElementById('pos-customer').value = id;
+            document.getElementById('pos-customer-search').value = name;
+            document.getElementById('customer-dropdown-list').classList.add('hidden');
+        };
+
+        window.togglePosPaymentFields = function() {
+            const payVal = document.getElementById('pos-payment').value;
+            const dpContainer = document.getElementById('pos-dp-container');
+            const cashContainer = document.getElementById('pos-cash-container');
+            
+            if (payVal === 'DP') {
+                dpContainer.classList.remove('hidden');
+                cashContainer.classList.add('hidden');
+            } else if (payVal === 'Lunas') {
+                dpContainer.classList.add('hidden');
+                cashContainer.classList.remove('hidden');
+            } else {
+                dpContainer.classList.add('hidden');
+                cashContainer.classList.add('hidden');
+            }
+            calculateChange();
         };
 
         window.calculateChange = function() {
-            const total = window.calculatePosTotal();
-            const payStatus = document.getElementById('pos-payment')?.value || 'Belum Lunas';
+            const grandTotal = window.posCart ? window.posCart.reduce((sum, item) => sum + item.subtotal, 0) : 0;
+            const payStatus = document.getElementById('pos-payment').value;
             
             if (payStatus === 'DP') {
-                const dpInput = parseFloat(document.getElementById('pos-dp-amount')?.value) || 0;
-                const sisa = Math.max(0, total - dpInput);
-                const sisaDisplay = document.getElementById('pos-sisa-display');
-                if (sisaDisplay) sisaDisplay.innerText = formatRp(sisa);
+                const dp = parseFloat(document.getElementById('pos-dp-amount').value) || 0;
+                const sisa = Math.max(0, grandTotal - dp);
+                document.getElementById('pos-sisa-display').innerText = formatRp(sisa);
             } else if (payStatus === 'Lunas') {
-                const cashInput = parseFloat(document.getElementById('pos-cash-amount')?.value) || 0;
-                const change = Math.max(0, cashInput - total);
-                const changeDisplay = document.getElementById('pos-change-display');
-                if (changeDisplay) changeDisplay.innerText = formatRp(change);
+                const cash = parseFloat(document.getElementById('pos-cash-amount').value) || 0;
+                const change = Math.max(0, cash - grandTotal);
+                document.getElementById('pos-change-display').innerText = formatRp(change);
             }
         };
 
         window.saveTransaction = async function() {
-            const custEl = document.getElementById('pos-customer');
-            const servEl = document.getElementById('pos-service');
-            const qtyEl = document.getElementById('pos-qty');
-            const payEl = document.getElementById('pos-payment');
-            const payMethodEl = document.getElementById('pos-payment-method');
+            const customerId = document.getElementById('pos-customer').value;
+            if (!customerId) return showToast("Pilih pelanggan dulu", "⚠️");
+            if (window.posCart.length === 0) return showToast("Tambahkan minimal 1 layanan", "⚠️");
 
-            if (!custEl || !servEl || !qtyEl || !payEl) {
-                showToast("Form tidak lengkap!", "⚠️");
-                return;
-            }
+            const customer = window.appState.customers.find(c => c.id === customerId);
+            const combinedServiceNames = window.posCart.map(item => item.name).join(', ');
+            const totalQty = window.posCart.reduce((sum, item) => sum + item.qty, 0);
+            const grandTotal = window.posCart.reduce((sum, item) => sum + item.subtotal, 0);
 
-            const custId = custEl.value;
-            const servId = servEl.value;
-            const qty = parseFloat(qtyEl.value);
-            const paymentStatus = payEl.value;
-            const paymentMethod = payMethodEl ? payMethodEl.value : 'Tunai';
-
-            if (!custId || !servId || isNaN(qty) || qty <= 0) {
-                showToast("Pilih pelanggan, layanan, dan jumlah yang benar!", "⚠️");
-                return;
-            }
-
-            const customer = window.appState.customers.find(c => c.id === custId);
-            const service = window.appState.services.find(s => s.id === servId);
+            const payStatus = document.getElementById('pos-payment').value;
+            const payMethod = document.getElementById('pos-payment-method').value;
             
-            if (!customer || !service) {
-                showToast("Data pelanggan atau layanan tidak ditemukan", "❌");
-                return;
-            }
-
-            const total = service.price * qty;
             let paidAmount = 0;
-            if (paymentStatus === 'Lunas') {
-                paidAmount = total;
-            } else if (paymentStatus === 'DP') {
-                paidAmount = parseFloat(document.getElementById('pos-dp-amount')?.value) || 0;
-                if (paidAmount <= 0) {
-                    showToast("Masukkan jumlah DP dengan benar!", "⚠️");
-                    return;
-                }
-            } else {
-                paidAmount = 0;
-            }
+            if(payStatus === 'DP') paidAmount = parseFloat(document.getElementById('pos-dp-amount').value) || 0;
+            if(payStatus === 'Lunas') paidAmount = grandTotal;
 
             const trxData = {
-                customerId: custId,
+                customerId: customerId,
                 customerName: customer.name,
-                serviceId: servId,
-                serviceName: `${service.name} (${service.category})`,
-                qty: qty,
-                total: total,
-                paidAmount: paidAmount,
+                serviceId: window.posCart[0].id, 
+                serviceName: combinedServiceNames,
+                qty: totalQty,
+                total: grandTotal,
                 status: 'Antrian',
-                paymentStatus: paymentStatus,
-                paymentMethod: paymentMethod
+                paymentStatus: payStatus,
+                paymentMethod: payMethod,
+                paidAmount: paidAmount
             };
 
             const btn = document.getElementById('btn-save-trx');
-            if (btn) {
-                btn.innerText = "Menyimpan...";
-                btn.disabled = true;
-            }
+            const oriText = btn.innerText;
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
 
             try {
                 await window.dbActions.addTransaction(trxData);
-                showToast("Transaksi Berhasil!", "✅");
+                showToast("Transaksi Berhasil", "✅");
+                window.posCart = []; 
                 switchView('transactions', 'all');
             } catch (e) {
-                console.error(e);
-                showToast("Gagal menyimpan transaksi", "❌");
-                if (btn) {
-                    btn.innerText = "Simpan Transaksi";
-                    btn.disabled = false;
-                }
+                showToast("Gagal menyimpan", "❌");
+            } finally {
+                btn.innerText = oriText;
+                btn.disabled = false;
             }
         };
-
+        
+        
+//================
         function renderMasterData() {
             return `
                 <div class="flex gap-2 mb-4 overflow-x-auto pb-2">

@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Laundry KU 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        /* Cegah Navigasi Usap Pinggir (CSS Lock & Touch Action) */
+        html, body {
+            overscroll-behavior: none;
+            overscroll-behavior-x: none;
+            touch-action: pan-y; /* Membatasi aksi sentuh hanya untuk scroll vertikal */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe, #bae6fd, #ffffff, #f0f9ff);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            overflow-x: hidden;
+            color: #1e3a8a;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .box-3d {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 2px solid #bae6fd;
+            box-shadow: 0 6px 0 #7dd3fc, 0 10px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-3d {
+            background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+            color: white;
+            border-radius: 0.75rem;
+            border: 1px solid #2563eb;
+            box-shadow: 0 4px 0 #1d4ed8, 0 5px 10px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            font-weight: 800;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            cursor: pointer;
+        }
+
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #1d4ed8, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-3d-red { background: linear-gradient(to bottom, #f87171, #ef4444); border-color: #dc2626; box-shadow: 0 4px 0 #b91c1c, 0 5px 10px rgba(0,0,0,0.2); }
+        .btn-3d-red:active { box-shadow: 0 0px 0 #b91c1c, 0 2px 5px rgba(0,0,0,0.2); transform: translateY(4px); }
+        
+        .btn-3d-green { background: linear-gradient(to bottom, #34d399, #10b981); border-color: #059669; box-shadow: 0 4px 0 #047857, 0 5px 10px rgba(0,0,0,0.2); }
+        .btn-3d-green:active { box-shadow: 0 0px 0 #047857, 0 2px 5px rgba(0,0,0,0.2); transform: translateY(4px); }
+
+        .btn-3d-white { background: #ffffff; color: #3b82f6; border-color: #bfdbfe; box-shadow: 0 4px 0 #93c5fd, 0 5px 10px rgba(0,0,0,0.1); text-shadow: none;}
+        .btn-3d-white:active { box-shadow: 0 0px 0 #93c5fd, 0 2px 5px rgba(0,0,0,0.1); transform: translateY(4px); }
+
+        .input-3d {
+            background: #f8fafc;
+            border: 2px solid #bae6fd;
+            border-radius: 0.75rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            width: 100%;
+            padding: 0.75rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-3d:focus { border-color: #3b82f6; }
+
+        .bottom-nav-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid #e0f2fe;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item {
+            min-width: 70px;
+            scroll-snap-align: start;
+        }
+        .nav-item.active { color: #2563eb; transform: scale(1.1); font-weight: bold; }
+        .nav-item i { font-size: 1.5rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 50; display: none; }
+
+        .marquee-wrapper { overflow: hidden; white-space: nowrap; width: 100%; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: inline-block; animation: scroll-left 15s linear infinite; padding-left: 100%; }
+        @keyframes scroll-left { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
+
+        #print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area { display: block; visibility: visible; position: absolute; left: 0; top: 0; width: 100%; font-family: monospace; color: black; background: white; }
+            #print-area * { visibility: visible; }
+        }
+    </style>
+</head>
+<body class="pb-24">
+
+    <header class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md border-b-2 border-blue-100 p-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2 overflow-hidden flex-1 mr-4">
+            <i class="fa-solid fa-washing-machine animate-bounce text-blue-600 text-xl z-10 shrink-0"></i>
+            <div class="marquee-wrapper w-full">
+                <div id="header-outlet-name" class="marquee-content font-extrabold text-xl tracking-tight"></div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <div id="bt-indicator-wrap" onclick="confirmDisconnectPrinter()" class="hidden items-center gap-1 bg-blue-100 px-2 py-1 rounded-full border border-blue-200 cursor-pointer" title="Printer Terhubung (Klik untuk putuskan)">
+                <i class="fa-brands fa-bluetooth-b text-blue-600 animate-pulse"></i>
+                <span class="text-[10px] font-bold text-blue-700">Terhubung</span>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                <span class="text-xs font-bold text-gray-600">Cloud Sync:</span>
+                <div id="sync-indicator" class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_5px_currentColor]"></div>
+            </div>
+        </div>
+    </header>
+
+    <div id="toast" class="box-3d px-4 py-2 font-bold text-center text-white bg-blue-500 border-blue-600"></div>
+
+    <main id="app-content" class="pt-20 px-4 max-w-lg mx-auto min-h-screen">
+        
+        <section id="view-dashboard" class="view-section">
+            <h2 class="text-2xl font-black mb-4 drop-shadow-sm"><i class="fa-solid fa-chart-pie text-blue-500"></i> Dasbor</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="box-3d p-4 flex flex-col justify-center items-center text-center cursor-pointer active:scale-95" onclick="showDashboardDetail('omset')">
+                    <i class="fa-solid fa-money-bill-wave text-3xl text-green-500 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-500">Omset Hari Ini</p>
+                    <p class="text-xl font-black text-green-600" id="dash-omset">Rp 0</p>
+                </div>
+                <div class="box-3d p-4 flex flex-col justify-center items-center text-center cursor-pointer active:scale-95" onclick="showDashboardDetail('trx')">
+                    <i class="fa-solid fa-receipt text-3xl text-blue-500 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-500">Trx Hari Ini</p>
+                    <p class="text-xl font-black text-blue-600" id="dash-trx">Rp 0</p>
+                </div>
+            </div>
+            
+            <div class="box-3d p-4 mb-6 flex flex-col justify-center items-center text-center cursor-pointer active:scale-95" onclick="showDashboardDetail('piutang')">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-hand-holding-dollar text-2xl text-red-500"></i>
+                    <p class="text-sm font-semibold text-gray-500">Total Piutang</p>
+                </div>
+                <p class="text-2xl font-black text-red-500" id="dash-piutang">Rp 0</p>
+            </div>
+
+            <button onclick="navTo('transaksi')" class="btn-3d w-full py-4 mb-6 text-lg flex justify-center items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Tambah Transaksi Baru
+            </button>
+
+            <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-bell text-yellow-500"></i> Notifikasi Pekerjaan</h3>
+            <div class="flex gap-2 overflow-x-auto hide-scroll pb-2">
+                <div onclick="navTo('pekerjaan', 'Antrian')" class="box-3d p-2 min-w-[80px] text-center cursor-pointer active:scale-95">
+                    <div class="text-xs font-bold text-gray-500">Antrian</div>
+                    <div class="text-xl font-black text-blue-500" id="dash-q-antrian">0</div>
+                </div>
+                <div onclick="navTo('pekerjaan', 'Proses')" class="box-3d p-2 min-w-[80px] text-center cursor-pointer active:scale-95">
+                    <div class="text-xs font-bold text-gray-500">Proses</div>
+                    <div class="text-xl font-black text-yellow-500" id="dash-q-proses">0</div>
+                </div>
+                <div onclick="navTo('pekerjaan', 'Siap Ambil')" class="box-3d p-2 min-w-[80px] text-center cursor-pointer active:scale-95">
+                    <div class="text-xs font-bold text-gray-500">Siap Ambil</div>
+                    <div class="text-xl font-black text-green-500" id="dash-q-siap">0</div>
+                </div>
+                <div onclick="navTo('pekerjaan', 'Selesai')" class="box-3d p-2 min-w-[80px] text-center cursor-pointer active:scale-95">
+                    <div class="text-xs font-bold text-gray-500">Selesai</div>
+                    <div class="text-xl font-black text-gray-800" id="dash-q-selesai">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-transaksi" class="view-section hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-black drop-shadow-sm"><i class="fa-solid fa-cart-plus text-blue-500"></i> Transaksi</h2>
+                <button onclick="resetTrxForm()" class="btn-3d-white px-3 py-1 text-xs"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+            </div>
+            
+            <div class="box-3d p-4 mb-4 space-y-4">
+                <input type="hidden" id="trx-id">
+
+                <div>
+                    <label class="block text-sm font-bold mb-1"><i class="fa-solid fa-calendar-day text-blue-500 mr-1"></i> Tanggal Masuk</label>
+                    <input type="date" id="trx-date" class="input-3d">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold mb-1">Pelanggan</label>
+                    <div class="relative">
+                        <input type="text" id="trx-pelanggan" class="input-3d pr-10" placeholder="Ketik nama pelanggan..." onkeyup="filterTrxList('pelanggan')">
+                        <i class="fa-solid fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div id="trx-pelanggan-list" class="hidden absolute bg-white border border-blue-200 rounded-lg shadow-lg mt-1 w-[90%] max-w-[450px] max-h-40 overflow-y-auto z-10"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Layanan (Otomatis Tambah)</label>
+                    <div class="relative">
+                        <input type="text" id="trx-layanan-search" class="input-3d pr-10" placeholder="Cari layanan (A-Z)..." onkeyup="filterTrxList('layanan')">
+                        <i class="fa-solid fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div id="trx-layanan-list" class="hidden absolute bg-white border border-blue-200 rounded-lg shadow-lg mt-1 w-[90%] max-w-[450px] max-h-40 overflow-y-auto z-10"></div>
+                </div>
+
+                <div id="trx-items-container" class="space-y-2"></div>
+
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-sm font-bold mb-1">Berat/Qty Manual</label>
+                        <input type="number" id="trx-qty-manual" class="input-3d" placeholder="Misal: 2.5" step="0.1">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="addManualItem()" class="btn-3d px-4 py-3"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <hr class="border-blue-100">
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Status Pekerjaan</label>
+                    <div class="flex gap-2 overflow-x-auto hide-scroll p-1" id="trx-status-container">
+                        <button type="button" onclick="setTrxStatus('Antrian')" class="trx-status-btn box-3d px-3 py-1 text-sm font-bold bg-blue-500 text-white shadow-[0_0_0] translate-y-[2px]">Antrian</button>
+                        <button type="button" onclick="setTrxStatus('Proses')" class="trx-status-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Proses</button>
+                        <button type="button" onclick="setTrxStatus('Siap Ambil')" class="trx-status-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Siap Ambil</button>
+                        <button type="button" onclick="setTrxStatus('Selesai')" class="trx-status-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Selesai</button>
+                    </div>
+                    <input type="hidden" id="trx-status-val" value="Antrian">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Metode Pembayaran</label>
+                    <div class="flex gap-2 overflow-x-auto hide-scroll p-1" id="trx-method-container">
+                        <button type="button" onclick="setTrxMethod('Tunai')" class="trx-method-btn box-3d px-3 py-1 text-sm font-bold bg-green-500 text-white shadow-[0_0_0] translate-y-[2px]">Tunai</button>
+                        <button type="button" onclick="setTrxMethod('Transfer')" class="trx-method-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Transfer</button>
+                        <button type="button" onclick="setTrxMethod('Shopee')" class="trx-method-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Shopee</button>
+                        <button type="button" onclick="setTrxMethod('Dana')" class="trx-method-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Dana</button>
+                        <button type="button" onclick="setTrxMethod('Gopay')" class="trx-method-btn box-3d px-3 py-1 text-sm font-bold text-gray-500">Gopay</button>
+                    </div>
+                    <input type="hidden" id="trx-method-val" value="Tunai">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Status Bayar</label>
+                    <div class="grid grid-cols-3 gap-2 p-1" id="trx-paystatus-container">
+                        <button type="button" onclick="setTrxPayStatus('Belum Lunas')" class="trx-paystatus-btn box-3d py-1 text-sm font-bold bg-red-500 text-white shadow-[0_0_0] translate-y-[2px]">Belum Lunas</button>
+                        <button type="button" onclick="setTrxPayStatus('DP')" class="trx-paystatus-btn box-3d py-1 text-sm font-bold text-gray-500">DP</button>
+                        <button type="button" onclick="setTrxPayStatus('Lunas')" class="trx-paystatus-btn box-3d py-1 text-sm font-bold text-gray-500">Lunas</button>
+                    </div>
+                    <input type="hidden" id="trx-paystatus-val" value="Belum Lunas">
+                </div>
+
+                <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <div class="flex justify-between mb-1"><span class="font-bold text-gray-600">Total Transaksi:</span> <span class="font-black text-xl" id="trx-total">Rp 0</span></div>
+                    
+                    <div id="trx-dp-container" class="hidden mt-2">
+                        <label class="block text-xs font-bold mb-1 text-gray-500">Input Bayar / DP (Rp)</label>
+                        <input type="number" id="trx-bayar" class="input-3d text-right font-bold text-lg" placeholder="0" oninput="calculateTrx()">
+                    </div>
+
+                    <div class="flex justify-between mt-2 text-sm"><span class="font-bold text-red-500">Sisa Tagihan:</span> <span class="font-bold text-red-500" id="trx-sisa">Rp 0</span></div>
+                    <div class="flex justify-between mt-1 text-sm"><span class="font-bold text-green-500">Kembalian:</span> <span class="font-bold text-green-500" id="trx-kembali">Rp 0</span></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="saveTransaction()" class="btn-3d py-3 col-span-2"><i class="fa-solid fa-save"></i> Simpan Transaksi</button>
+                    <button onclick="printNotaBluetooth()" class="btn-3d-white py-2"><i class="fa-solid fa-print"></i> Print Nota</button>
+                    <button onclick="shareNota()" class="btn-3d-white py-2"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                    <button id="btn-hapus-trx" onclick="deleteTransaction()" class="btn-3d-red py-2 col-span-2 hidden"><i class="fa-solid fa-trash"></i> Hapus & Batalkan</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-pekerjaan" class="view-section hidden">
+            <h2 class="text-2xl font-black mb-4 drop-shadow-sm"><i class="fa-solid fa-clipboard-list text-blue-500"></i> Pekerjaan</h2>
+            
+            <div class="relative mb-4">
+                <input type="text" id="job-search" class="input-3d pl-10" placeholder="Cari nama pelanggan..." onkeyup="renderJobs(document.querySelector('.job-filter-btn.bg-blue-500').textContent.trim())">
+                <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-400"></i>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto hide-scroll mb-4 pb-2" id="job-filters">
+                <button onclick="renderJobs('Semua')" class="job-filter-btn box-3d px-4 py-2 font-bold bg-blue-500 text-white shadow-[0_0_0] translate-y-[2px]">Semua</button>
+                <button onclick="renderJobs('Antrian')" class="job-filter-btn box-3d px-4 py-2 font-bold text-gray-500">Antrian</button>
+                <button onclick="renderJobs('Proses')" class="job-filter-btn box-3d px-4 py-2 font-bold text-gray-500">Proses</button>
+                <button onclick="renderJobs('Siap Ambil')" class="job-filter-btn box-3d px-4 py-2 font-bold text-gray-500">Siap Ambil</button>
+                <button onclick="renderJobs('Selesai')" class="job-filter-btn box-3d px-4 py-2 font-bold text-gray-500">Selesai</button>
+            </div>
+
+            <div id="jobs-container" class="space-y-4"></div>
+        </section>
+
+        <section id="view-layanan" class="view-section hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-black drop-shadow-sm"><i class="fa-solid fa-tags text-blue-500"></i> Layanan</h2>
+                <button onclick="openServiceForm()" class="btn-3d px-3 py-1 text-sm"><i class="fa-solid fa-plus"></i> Baru</button>
+            </div>
+            
+            <div id="service-form" class="box-3d p-4 mb-4 hidden space-y-3">
+                <input type="hidden" id="srv-id">
+                <input type="text" id="srv-nama" class="input-3d" placeholder="Nama Layanan">
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="srv-kategori" class="input-3d">
+                        <option value="Kiloan">Kiloan</option>
+                        <option value="Satuan">Satuan</option>
+                        <option value="Express">Express</option>
+                        <option value="Treatment">Treatment</option>
+                    </select>
+                    <select id="srv-satuan" class="input-3d">
+                        <option value="kg">kg</option>
+                        <option value="m²">m²</option>
+                        <option value="pcs">pcs</option>
+                        <option value="set">set</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="srv-estimasi" class="input-3d" placeholder="Estimasi (ex: 2 Hari)">
+                    <input type="number" id="srv-min" class="input-3d" placeholder="Min Berat/Qty">
+                </div>
+                <input type="number" id="srv-harga" class="input-3d" placeholder="Harga">
+                <div class="flex gap-2">
+                    <button onclick="saveService()" class="btn-3d py-2 flex-1">Simpan</button>
+                    <button onclick="document.getElementById('service-form').classList.add('hidden')" class="btn-3d-white py-2 flex-1">Batal</button>
+                </div>
+            </div>
+
+            <div id="services-container" class="space-y-3"></div>
+        </section>
+
+        <section id="view-pelanggan" class="view-section hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-black drop-shadow-sm"><i class="fa-solid fa-users text-blue-500"></i> Pelanggan</h2>
+                <div class="flex gap-2">
+                    <button onclick="importContact()" class="btn-3d-white px-2 py-1 text-xs" title="Impor Kontak"><i class="fa-solid fa-address-book"></i></button>
+                    <button onclick="openCustomerForm()" class="btn-3d px-3 py-1 text-sm"><i class="fa-solid fa-plus"></i> Baru</button>
+                </div>
+            </div>
+
+            <div id="customer-form" class="box-3d p-4 mb-4 hidden space-y-3">
+                <input type="hidden" id="cust-id">
+                <input type="text" id="cust-nama" class="input-3d" placeholder="Nama Pelanggan">
+                <input type="tel" id="cust-tlp" class="input-3d" placeholder="No. Tlp (Opsional)">
+                <div class="flex gap-2">
+                    <button onclick="saveCustomer()" class="btn-3d py-2 flex-1">Simpan</button>
+                    <button onclick="document.getElementById('customer-form').classList.add('hidden')" class="btn-3d-white py-2 flex-1">Batal</button>
+                </div>
+            </div>
+
+            <div class="relative mb-4">
+                <input type="text" id="cust-search" class="input-3d pl-10" placeholder="Cari pelanggan..." onkeyup="renderCustomers()">
+                <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-400"></i>
+            </div>
+
+            <div id="customers-container" class="space-y-3"></div>
+        </section>
+
+        <section id="view-laporan" class="view-section hidden">
+            <h2 class="text-2xl font-black mb-4 drop-shadow-sm"><i class="fa-solid fa-file-invoice text-blue-500"></i> Laporan</h2>
+            
+            <div class="box-3d p-4 mb-4 space-y-3">
+                <h3 class="font-bold border-b pb-1">Filter Laporan</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="text-xs">Dari Tgl</label><input type="date" id="lap-tgl-dari" class="input-3d text-sm p-1"></div>
+                    <div><label class="text-xs">S/d Tgl</label><input type="date" id="lap-tgl-sd" class="input-3d text-sm p-1"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="lap-metode" class="input-3d text-sm p-1">
+                        <option value="Semua">Semua Pembayaran</option>
+                        <option value="Tunai">Tunai</option><option value="Transfer">Transfer</option>
+                        <option value="Shopee">Shopee</option><option value="Dana">Dana</option><option value="Gopay">Gopay</option>
+                    </select>
+                    <select id="lap-status" class="input-3d text-sm p-1">
+                        <option value="Semua">Semua Status</option>
+                        <option value="Lunas">Lunas</option>
+                        <option value="DP">DP</option>
+                        <option value="Belum Lunas">Belum Lunas</option>
+                    </select>
+                </div>
+                <button onclick="generateReports()" class="btn-3d w-full py-2">Terapkan Filter</button>
+            </div>
+
+            <div class="space-y-3" id="reports-container">
+                <div onclick="showReportDetail('Omset')" class="box-3d p-4 flex justify-between items-center cursor-pointer active:scale-95">
+                    <div><p class="text-sm font-bold text-gray-500">Total Omset</p><p class="text-xl font-black text-green-500" id="lap-val-omset">Rp 0</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+                <div onclick="showReportDetail('Masuk')" class="box-3d p-4 flex justify-between items-center cursor-pointer active:scale-95">
+                    <div><p class="text-sm font-bold text-gray-500">Transaksi Masuk</p><p class="text-xl font-black text-blue-500" id="lap-val-masuk">Rp 0</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+                <div onclick="showReportDetail('Lunas')" class="box-3d p-4 flex justify-between items-center cursor-pointer active:scale-95">
+                    <div><p class="text-sm font-bold text-gray-500">Transaksi Lunas</p><p class="text-xl font-black text-blue-800" id="lap-val-lunas">Rp 0</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+                <div onclick="showReportDetail('Piutang')" class="box-3d p-4 flex justify-between items-center cursor-pointer active:scale-95">
+                    <div><p class="text-sm font-bold text-gray-500">Total Piutang</p><p class="text-xl font-black text-red-500" id="lap-val-piutang">Rp 0</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-pengaturan" class="view-section hidden">
+            <h2 class="text-2xl font-black mb-4 drop-shadow-sm"><i class="fa-solid fa-cog text-blue-500"></i> Pengaturan</h2>
+            
+            <div class="box-3d p-4 mb-4">
+                <h3 class="font-bold border-b pb-2 mb-3">Info Outlet</h3>
+                <div class="space-y-3">
+                    <input type="text" id="set-nama" class="input-3d" placeholder="Nama Outlet">
+                    <textarea id="set-alamat" class="input-3d" placeholder="Alamat"></textarea>
+                    <input type="text" id="set-tlp" class="input-3d" placeholder="No. Tlp">
+                    <button onclick="saveOutletInfo()" class="btn-3d w-full py-3 mt-2"><i class="fa-solid fa-save"></i> Simpan Info Outlet</button>
+                </div>
+                
+                <h4 class="font-bold text-sm border-b pb-2 mt-4 mb-3">Tampilan Teks Header Berjalan</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold w-1/3">Warna Teks</label>
+                        <input type="color" id="set-marquee-color" class="h-10 w-full cursor-pointer rounded border border-blue-200" oninput="saveSettings()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold w-1/3">Durasi (Detik)</label>
+                        <input type="range" id="set-marquee-speed" min="2" max="30" class="w-full cursor-pointer accent-blue-600" oninput="saveSettings()">
+                        <span id="speed-val" class="text-xs font-bold text-blue-600 w-8 text-right">15s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-3d p-4 mb-4">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <h3 class="font-bold">Pengaturan Print Nota</h3>
+                    <button onclick="previewNota()" class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded shadow-sm">Preview</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm" id="print-checks">
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-nama" onchange="saveSettings()" checked> Nama Outlet</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-alamat" onchange="saveSettings()" checked> Alamat</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-tlp" onchange="saveSettings()" checked> No Tlp</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-layanan" onchange="saveSettings()" checked> Layanan</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-kasir" onchange="saveSettings()" checked> Kasir</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-parfum" onchange="saveSettings()"> Parfum</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="chk-detail" onchange="saveSettings()" checked> Detail Trx</label>
+                </div>
+                <div class="mt-3">
+                    <label class="block text-xs font-bold mb-1">Teks Footer</label>
+                    <input type="text" id="set-footer" class="input-3d" placeholder="Terima Kasih..." onchange="saveSettings()">
+                </div>
+            </div>
+
+            <div class="box-3d p-4 mb-4">
+                <h3 class="font-bold border-b pb-2 mb-3"><i class="fa-solid fa-cloud text-blue-500"></i> Cloud Storage (Google Sheet)</h3>
+                <p class="text-xs text-gray-500 mb-2">1. Copy Script ini dan paste di Apps Script Google Sheet Anda, Deploy sebagai Web App (Anyone).</p>
+                <div class="flex gap-2 mb-3">
+                    <input type="text" readonly value="function doPost(e){var s=SpreadsheetApp.getActive().getSheets()[0];s.getRange('A1').setValue(e.postData.contents);return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);}function doGet(){var s=SpreadsheetApp.getActive().getSheets()[0];var v=s.getRange('A1').getValue();return ContentService.createTextOutput(v?v:'{}').setMimeType(ContentService.MimeType.JSON);}" class="input-3d text-xs font-mono bg-gray-100" id="script-code">
+                    <button onclick="copyScript()" class="btn-3d px-3"><i class="fa-solid fa-copy"></i></button>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">2. Masukkan URL Web App di bawah ini:</p>
+                <input type="url" id="set-cloud-url" class="input-3d mb-2" placeholder="https://script.google.com/macros/s/..." onchange="saveSettings()">
+                
+                <div class="grid grid-cols-3 gap-2 mt-2">
+                    <button onclick="testCloudConnection()" class="btn-3d-white py-1 text-xs">Test Koneksi</button>
+                    <button onclick="uploadToCloud()" class="btn-3d py-1 text-xs bg-blue-500"><i class="fa-solid fa-upload"></i> Unggah</button>
+                    <button onclick="downloadFromCloud()" class="btn-3d-green py-1 text-xs"><i class="fa-solid fa-download"></i> Tarik</button>
+                </div>
+            </div>
+
+            <div class="box-3d p-4 mb-4 grid grid-cols-2 gap-2">
+                <button onclick="exportExcel()" class="btn-3d-green py-2 text-sm"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+                <button onclick="resetDataModal()" class="btn-3d-red py-2 text-sm"><i class="fa-solid fa-triangle-exclamation"></i> Reset App</button>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 w-full bottom-nav-container py-2 px-1 z-40">
+        <div class="flex overflow-x-auto hide-scroll justify-between items-center gap-2 max-w-lg mx-auto">
+            <div onclick="navTo('dashboard')" class="nav-item active flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="dashboard">
+                <i class="fa-solid fa-home"></i><span class="text-[10px] mt-1">Dasbor</span>
+            </div>
+            <div onclick="navTo('transaksi')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="transaksi">
+                <i class="fa-solid fa-plus-circle text-blue-500"></i><span class="text-[10px] mt-1">Tambah</span>
+            </div>
+            <div onclick="navTo('pekerjaan')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="pekerjaan">
+                <i class="fa-solid fa-clipboard-list"></i><span class="text-[10px] mt-1">Pekerjaan</span>
+            </div>
+            <div onclick="navTo('layanan')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="layanan">
+                <i class="fa-solid fa-tags"></i><span class="text-[10px] mt-1">Layanan</span>
+            </div>
+            <div onclick="navTo('pelanggan')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="pelanggan">
+                <i class="fa-solid fa-users"></i><span class="text-[10px] mt-1">Pelanggan</span>
+            </div>
+            <div onclick="navTo('laporan')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="laporan">
+                <i class="fa-solid fa-file-invoice"></i><span class="text-[10px] mt-1">Laporan</span>
+            </div>
+            <div onclick="navTo('pengaturan')" class="nav-item flex flex-col items-center justify-center cursor-pointer p-2 rounded-xl transition-all" data-target="pengaturan">
+                <i class="fa-solid fa-cog"></i><span class="text-[10px] mt-1">Pengaturan</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal Detail General -->
+    <div id="modal-detail" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="box-3d w-full max-w-md max-h-[90vh] overflow-y-auto p-4 relative">
+            <button onclick="closeModal('modal-detail')" class="absolute top-3 right-3 text-red-500 text-xl"><i class="fa-solid fa-times-circle"></i></button>
+            <h3 class="font-black text-lg mb-2" id="modal-detail-title">Detail Transaksi</h3>
+            <div id="modal-detail-content" class="text-sm space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- Modal Pembayaran Langsung dari Pekerjaan -->
+    <div id="modal-bayar" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="box-3d w-full max-w-sm p-4 relative bg-white">
+            <button onclick="closeModal('modal-bayar')" class="absolute top-3 right-3 text-red-500 text-xl"><i class="fa-solid fa-times-circle"></i></button>
+            <h3 class="font-black text-lg mb-4 text-gray-800" id="modal-bayar-title"><i class="fa-solid fa-money-bill-wave text-green-500"></i> Update Pembayaran</h3>
+            <input type="hidden" id="bayar-trx-id">
+            
+            <div class="bg-blue-50 p-3 rounded-lg mb-4 border border-blue-100">
+                <div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Total Tagihan:</span> <span class="font-bold text-gray-800" id="bayar-total">Rp 0</span></div>
+                <div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Telah Dibayar:</span> <span class="font-bold text-green-600" id="bayar-sudah">Rp 0</span></div>
+                <div class="flex justify-between text-sm border-t border-blue-200 mt-1 pt-1"><span class="text-gray-600">Sisa Tagihan:</span> <span class="font-bold text-red-500" id="bayar-sisa">Rp 0</span></div>
+            </div>
+
+            <label class="block text-xs font-bold mb-2 text-gray-700">Pilih Status Pembayaran Baru</label>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button type="button" onclick="setModalBayarStatus('Lunas')" id="btn-bayar-lunas" class="box-3d py-2 text-sm font-bold bg-green-500 text-white shadow-[0_0_0] translate-y-[2px]">Lunas Semua</button>
+                <button type="button" onclick="setModalBayarStatus('DP')" id="btn-bayar-dp" class="box-3d py-2 text-sm font-bold text-gray-500">Bayar Cicil / DP</button>
+            </div>
+            
+            <div id="bayar-input-container" class="hidden mb-4">
+                <label class="block text-xs font-bold mb-1 text-gray-700">Nominal Penambahan Pembayaran (Rp)</label>
+                <input type="number" id="bayar-nominal" class="input-3d font-bold text-lg" placeholder="0">
+                <p class="text-[10px] text-gray-500 mt-1">*Masukkan nominal uang tambahan yang diberikan hari ini.</p>
+            </div>
+
+            <button onclick="prosesPembayaran()" class="btn-3d w-full py-3"><i class="fa-solid fa-check-circle"></i> Simpan Pembayaran</button>
+        </div>
+    </div>
+
+    <!-- Modal Update Status -->
+    <div id="modal-status" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="box-3d w-full max-w-sm p-4 relative bg-white">
+            <button onclick="closeModal('modal-status')" class="absolute top-3 right-3 text-red-500 text-xl"><i class="fa-solid fa-times-circle"></i></button>
+            <h3 class="font-black text-lg mb-4 text-gray-800"><i class="fa-solid fa-spinner text-blue-500"></i> Update Status</h3>
+            <input type="hidden" id="status-trx-id">
+            
+            <p class="text-xs text-gray-600 mb-3 text-center">Pilih status pekerjaan saat ini:</p>
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="updateStatusFromModal('Proses')" class="btn-3d py-3 flex justify-center items-center gap-2"><i class="fa-solid fa-spinner"></i> Proses</button>
+                <button onclick="updateStatusFromModal('Siap Ambil')" class="btn-3d-green py-3 flex justify-center items-center gap-2"><i class="fa-solid fa-box-open"></i> Siap Ambil</button>
+                <button onclick="updateStatusFromModal('Selesai')" class="btn-3d-white py-3 flex justify-center items-center gap-2 border border-gray-300"><i class="fa-solid fa-check-circle text-green-500"></i> Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PENCARIAN BLUETOOTH INTERAKTIF -->
+    <div id="modal-bluetooth" class="fixed inset-0 bg-slate-900/70 z-50 hidden flex justify-center items-center p-4 backdrop-blur-md transition-all duration-300">
+        <div class="box-3d w-full max-w-sm p-6 text-center relative flex flex-col items-center overflow-hidden bg-white/95">
+            <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-100/50 to-transparent"></div>
+            <button onclick="closeModal('modal-bluetooth')" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 text-2xl transition-colors z-20" id="btn-close-bt" title="Tutup"><i class="fa-solid fa-circle-xmark"></i></button>
+            
+            <div id="bt-animation-container" class="relative w-32 h-32 mb-6 mt-2 flex justify-center items-center z-10">
+                <div class="absolute inset-0 border-2 border-blue-200 rounded-full"></div>
+                <div class="absolute inset-4 border-2 border-blue-100 rounded-full"></div>
+                <div class="absolute inset-8 border border-blue-50 rounded-full"></div>
+                <div id="bt-radar-sweep" class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-400/30 to-transparent animate-[spin_2s_linear_infinite]" style="clip-path: polygon(50% 50%, 100% 0, 100% 100%);"></div>
+                <div id="bt-ripple-1" class="absolute inset-0 rounded-full border-4 border-blue-400 opacity-0 animate-ping"></div>
+                
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex justify-center items-center z-10 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-white text-3xl transition-all duration-500" id="bt-icon-wrapper">
+                    <i class="fa-brands fa-bluetooth-b" id="bt-modal-icon"></i>
+                </div>
+            </div>
+
+            <h3 class="font-black text-2xl mb-3 text-slate-800" id="bt-modal-title">Printer Bluetooth Thermal</h3>
+            
+            <div id="bt-steps" class="flex justify-center items-center gap-1 mb-4 text-[10px] font-bold w-full">
+                 <div class="flex flex-col items-center flex-1">
+                     <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center mb-1 transition-colors duration-300" id="step-1-icon">1</div>
+                     <span class="text-blue-600 font-bold" id="step-1-text">Cari Printer</span>
+                 </div>
+                 <div class="w-4 border-t-2 border-dashed border-slate-200"></div>
+                 <div class="flex flex-col items-center flex-1">
+                     <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mb-1 transition-colors duration-300" id="step-2-icon">2</div>
+                     <span class="text-slate-500" id="step-2-text">Pilih Device</span>
+                 </div>
+                 <div class="w-4 border-t-2 border-dashed border-slate-200"></div>
+                 <div class="flex flex-col items-center flex-1">
+                     <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mb-1 transition-colors duration-300" id="step-3-icon">3</div>
+                     <span class="text-slate-500" id="step-3-text">Cetak Nota</span>
+                 </div>
+            </div>
+
+            <p class="text-sm text-slate-600 mb-2 px-2" id="bt-modal-desc">Klik tombol di bawah untuk memilih printer Bluetooth Thermal Anda.</p>
+            <div id="bt-action-area" class="w-full mt-2 space-y-2"></div>
+        </div>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        const defaultData = {
+            transactions: [],
+            services: [
+                {id: 's1', nama: 'Cuci Komplit', kategori: 'Kiloan', satuan: 'kg', estimasi: '2 Hari', min: 1, harga: 6000},
+                {id: 's2', nama: 'Setrika Saja', kategori: 'Kiloan', satuan: 'kg', estimasi: '1 Hari', min: 1, harga: 4000},
+                {id: 's3', nama: 'Bed Cover Besar', kategori: 'Satuan', satuan: 'pcs', estimasi: '3 Hari', min: 1, harga: 25000}
+            ],
+            customers: [
+                {id: 'c1', nama: 'Aksa', tlp: '08123456789'}
+            ],
+            settings: {
+                nama: 'LAUNDRY KU 3D', alamat: 'Jl. Estetik No. 123', tlp: '08111222333', footer: 'Terima Kasih! Barang yang tidak diambil >1 bulan bukan tanggung jawab kami.',
+                cloudUrl: '', chk: {nama:true, alamat:true, tlp:true, layanan:true, kasir:true, parfum:false, detail:true},
+                marqueeColor: '#1d4ed8', marqueeSpeed: 15
+            }
+        };
+
+        let db = JSON.parse(localStorage.getItem('laundry_db')) || defaultData;
+        let currentTrxItems = [];
+        let editingTrxId = null;
+        let currentBayarMode = 'Lunas';
+        let currentView = 'dashboard';
+        
+        let currentPrintString = ''; 
+        let bluetoothDevice = null;
+        let bluetoothCharacteristic = null;
+
+        // Daftar UUID service Bluetooth Thermal Printer populer
+        const PRINTER_SERVICES = [
+            '000018f0-0000-1000-8000-00805f9b34fb',
+            'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+            '0000af00-0000-1000-8000-00805f9b34fb',
+            '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+            '0000ff00-0000-1000-8000-00805f9b34fb',
+            '00001801-0000-1000-8000-00805f9b34fb',
+            '00001800-0000-1000-8000-00805f9b34fb'
+        ];
+
+        function saveLocal() {
+            localStorage.setItem('laundry_db', JSON.stringify(db));
+            backgroundSync();
+        }
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `box-3d px-4 py-2 font-bold text-center text-white fixed top-5 left-1/2 -translate-x-1/2 z-50 ${isError ? 'bg-red-500 border-red-600' : 'bg-blue-500 border-blue-600'}`;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        const formatRp = (num) => 'Rp ' + Number(num).toLocaleString('id-ID');
+        const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+        
+        const getTodayStr = () => {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+        }
+
+        const getFirstDayOfMonthStr = () => {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const tzoffset = firstDay.getTimezoneOffset() * 60000;
+            return (new Date(firstDay.getTime() - tzoffset)).toISOString().split('T')[0];
+        }
+
+        const extractDateStr = (dateString) => {
+            try {
+                if (!dateString) return getTodayStr();
+                if (dateString.includes('T')) return dateString.split('T')[0];
+                const d = new Date(dateString);
+                if (isNaN(d.getTime())) return getTodayStr();
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (e) {
+                return getTodayStr();
+            }
+        };
+
+        window.onload = () => {
+            initSettingsForm();
+            setupHistoryProtection();
+            resetTrxForm();
+            navTo('dashboard');
+            updateHeaderDisplay();
+            
+            if(db.settings.cloudUrl) {
+                downloadFromCloud(true);
+            }
+        };
+
+        // --- MANAJEMEN RIWAYAT / KUNCI GESTUR KEMBALI HP ---
+        function setupHistoryProtection() {
+            try {
+                history.pushState({ page: 'dashboard' }, '', '');
+            } catch(e){}
+
+            window.addEventListener('popstate', (e) => {
+                try {
+                    history.pushState({ page: currentView }, '', '');
+                } catch(err){}
+
+                // 1. Jika ada Modal aktif, tutup modal lebih dahulu
+                const modals = ['modal-detail', 'modal-bayar', 'modal-status', 'modal-bluetooth'];
+                let closedAny = false;
+                modals.forEach(mId => {
+                    const el = document.getElementById(mId);
+                    if (el && !el.classList.contains('hidden')) {
+                        closeModal(mId);
+                        closedAny = true;
+                    }
+                });
+
+                if (closedAny) return;
+
+                // 2. Jika berada di tampilan selain Dasbor, kembali ke Dasbor
+                if (currentView !== 'dashboard') {
+                    navTo('dashboard');
+                    showToast('Kembali ke Dasbor');
+                    return;
+                }
+
+                // 3. Jika sudah di Dasbor, beri peringatan aplikasi terkunci di HP
+                showToast('Aplikasi Terkunci (Atas Usap HP)');
+            });
+        }
+
+        function navTo(viewId, extraParam = null) {
+            currentView = viewId;
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active', 'text-blue-600', 'scale-110');
+                if(el.dataset.target === viewId) el.classList.add('active');
+            });
+
+            if(viewId === 'dashboard') renderDashboard();
+            if(viewId === 'pekerjaan') renderJobs(extraParam || 'Semua');
+            if(viewId === 'layanan') renderServices();
+            if(viewId === 'pelanggan') renderCustomers();
+            if(viewId === 'laporan') {
+                document.getElementById('lap-tgl-dari').value = getFirstDayOfMonthStr();
+                document.getElementById('lap-tgl-sd').value = getTodayStr();
+                generateReports();
+            }
+            if(viewId === 'transaksi') {
+                if(extraParam === 'reset' || !editingTrxId) {
+                    if (!editingTrxId) document.getElementById('trx-date').value = getTodayStr();
+                    if (extraParam === 'reset') resetTrxForm();
+                }
+            }
+            window.scrollTo(0,0);
+        }
+
+        function renderDashboard() {
+            const today = getTodayStr();
+            let omset = 0;
+            let trxTotal = 0;
+            let piutang = 0;
+            let counts = { 'Antrian': 0, 'Proses': 0, 'Siap Ambil': 0, 'Selesai': 0 };
+
+            db.transactions.forEach(t => {
+                if(t.status === 'Batal') return;
+
+                if(counts[t.status] !== undefined) counts[t.status]++;
+
+                const tDate = extractDateStr(t.date);
+                
+                if(tDate === today) {
+                    trxTotal += Number(t.total) || 0;
+                    omset += Number(t.dibayar) || 0;
+                }
+                
+                if((Number(t.sisa) || 0) > 0) {
+                    piutang += Number(t.sisa);
+                }
+            });
+
+            document.getElementById('dash-omset').textContent = formatRp(omset);
+            document.getElementById('dash-trx').textContent = formatRp(trxTotal);
+            document.getElementById('dash-piutang').textContent = formatRp(piutang);
+            
+            document.getElementById('dash-q-antrian').textContent = counts['Antrian'];
+            document.getElementById('dash-q-proses').textContent = counts['Proses'];
+            document.getElementById('dash-q-siap').textContent = counts['Siap Ambil'];
+            document.getElementById('dash-q-selesai').textContent = counts['Selesai'];
+        }
+
+        function showDashboardDetail(type) {
+            const today = getTodayStr();
+            let filtered = [];
+            let title = '';
+
+            if (type === 'omset') {
+                title = 'Detail Omset Hari Ini (' + today + ')';
+                filtered = db.transactions.filter(t => t.status !== 'Batal' && extractDateStr(t.date) === today && (Number(t.dibayar) || 0) > 0);
+            } else if (type === 'trx') {
+                title = 'Detail Transaksi Hari Ini (' + today + ')';
+                filtered = db.transactions.filter(t => t.status !== 'Batal' && extractDateStr(t.date) === today);
+            } else if (type === 'piutang') {
+                title = 'Detail Total Piutang';
+                filtered = db.transactions.filter(t => t.status !== 'Batal' && (Number(t.sisa) || 0) > 0);
+            }
+
+            document.getElementById('modal-detail-title').textContent = title;
+            let html = '';
+            if (filtered.length === 0) {
+                html = `<div class="text-center text-gray-500 py-4">Tidak ada transaksi yang sesuai pada kolom ini.</div>`;
+            } else {
+                filtered.forEach(t => {
+                    html += `
+                        <div class="border-b border-gray-200 py-2 cursor-pointer hover:bg-blue-50" onclick="editTransaction('${t.id}'); closeModal('modal-detail')">
+                            <div class="flex justify-between font-bold text-blue-700"><span>${t.pelanggan}</span> <span>${formatRp(t.total)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>${t.nota} | ${new Date(t.date).toLocaleDateString('id-ID')}</span>
+                                <span class="${Number(t.sisa)>0?'text-red-500':'text-green-600'}">${t.statusBayar} (Sisa: ${formatRp(t.sisa)}, Dibayar: ${formatRp(t.dibayar)})</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('modal-detail-content').innerHTML = html;
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function resetTrxForm() {
+            editingTrxId = null;
+            document.getElementById('trx-id').value = '';
+            document.getElementById('trx-date').value = getTodayStr();
+            document.getElementById('trx-pelanggan').value = '';
+            document.getElementById('trx-layanan-search').value = '';
+            currentTrxItems = [];
+            document.getElementById('trx-qty-manual').value = '';
+            setTrxStatus('Antrian');
+            setTrxMethod('Tunai');
+            setTrxPayStatus('Belum Lunas');
+            document.getElementById('trx-bayar').value = '';
+            document.getElementById('btn-hapus-trx').classList.add('hidden');
+            renderTrxItems();
+        }
+
+        function filterTrxList(type) {
+            const input = document.getElementById(`trx-${type}${type==='layanan'?'-search':''}`).value.toLowerCase();
+            const list = document.getElementById(`trx-${type}-list`);
+            list.innerHTML = '';
+            
+            if(!input) { list.classList.add('hidden'); return; }
+            list.classList.remove('hidden');
+
+            const source = type === 'pelanggan' ? db.customers : db.services;
+            const filtered = source.filter(x => x.nama.toLowerCase().includes(input));
+
+            if(type === 'pelanggan' && filtered.length === 0) {
+                list.innerHTML = `<div class="p-2 text-sm cursor-pointer hover:bg-blue-50 text-blue-600 font-bold" onclick="addNewPelangganTrx('${input}')">+ Tambah "${input}"</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-2 border-b text-sm cursor-pointer hover:bg-blue-50';
+                div.textContent = type === 'pelanggan' ? `${item.nama} ${item.tlp ? '('+item.tlp+')' : ''}` : `${item.nama} - ${formatRp(item.harga)}/${item.satuan}`;
+                div.onclick = () => {
+                    if(type === 'pelanggan') {
+                        document.getElementById('trx-pelanggan').value = item.nama;
+                        list.classList.add('hidden');
+                    } else {
+                        addTrxItem(item);
+                        list.classList.add('hidden');
+                        document.getElementById('trx-layanan-search').value = '';
+                    }
+                };
+                list.appendChild(div);
+            });
+        }
+
+        function addNewPelangganTrx(nama) {
+            const newCust = { id: genId(), nama: nama, tlp: '' };
+            db.customers.push(newCust);
+            saveLocal();
+            document.getElementById('trx-pelanggan').value = nama;
+            document.getElementById('trx-pelanggan-list').classList.add('hidden');
+            showToast('Pelanggan ditambahkan');
+        }
+
+        function addTrxItem(service, qty = null) {
+            const existing = currentTrxItems.find(i => i.id === service.id);
+            if(existing && !qty) {
+                existing.qty += 1;
+            } else {
+                currentTrxItems.push({ ...service, qty: qty || service.min });
+            }
+            renderTrxItems();
+        }
+
+        function addManualItem() {
+            const qty = parseFloat(document.getElementById('trx-qty-manual').value);
+            if(!qty || currentTrxItems.length === 0) return showToast('Pilih layanan & masukkan qty');
+            currentTrxItems[currentTrxItems.length - 1].qty = qty;
+            document.getElementById('trx-qty-manual').value = '';
+            renderTrxItems();
+        }
+
+        function renderTrxItems() {
+            const container = document.getElementById('trx-items-container');
+            container.innerHTML = '';
+            currentTrxItems.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-white p-2 rounded-lg border border-blue-100 shadow-sm text-sm';
+                div.innerHTML = `
+                    <div class="flex-1 font-bold">${item.nama}</div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeQty(${idx}, -1)" class="bg-gray-200 px-2 rounded">-</button>
+                        <span>${item.qty} ${item.satuan}</span>
+                        <button onclick="changeQty(${idx}, 1)" class="bg-gray-200 px-2 rounded">+</button>
+                        <span class="ml-2 w-20 text-right">${formatRp(item.qty * item.harga)}</span>
+                        <button onclick="removeTrxItem(${idx})" class="text-red-500 ml-2"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            calculateTrx();
+        }
+
+        function changeQty(idx, delta) {
+            currentTrxItems[idx].qty += delta;
+            if(currentTrxItems[idx].qty <= 0) removeTrxItem(idx);
+            else renderTrxItems();
+        }
+        
+        function removeTrxItem(idx) { currentTrxItems.splice(idx, 1); renderTrxItems(); }
+
+        function updateBtnGroup(groupClass, valId, val) {
+            document.querySelectorAll(`.${groupClass}`).forEach(btn => {
+                if(btn.textContent.trim() === val) {
+                    btn.className = `${groupClass} box-3d px-3 py-1 text-sm font-bold text-white shadow-[0_0_0] translate-y-[2px] ${groupClass.includes('status') ? 'bg-blue-500' : groupClass.includes('method') ? 'bg-green-500' : 'bg-red-500'}`;
+                } else {
+                    btn.className = `${groupClass} box-3d px-3 py-1 text-sm font-bold text-gray-500`;
+                }
+            });
+            document.getElementById(valId).value = val;
+        }
+
+        function setTrxStatus(val) { updateBtnGroup('trx-status-btn', 'trx-status-val', val); }
+        function setTrxMethod(val) { updateBtnGroup('trx-method-btn', 'trx-method-val', val); }
+        function setTrxPayStatus(val) {
+            updateBtnGroup('trx-paystatus-btn', 'trx-paystatus-val', val);
+            const dpCont = document.getElementById('trx-dp-container');
+            const bayarInput = document.getElementById('trx-bayar');
+            
+            if(val === 'Belum Lunas') {
+                dpCont.classList.add('hidden');
+                bayarInput.value = 0;
+            } else if (val === 'Lunas') {
+                dpCont.classList.remove('hidden');
+                const total = currentTrxItems.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+                bayarInput.value = total;
+            } else {
+                dpCont.classList.remove('hidden');
+                bayarInput.value = '';
+                bayarInput.focus();
+            }
+            calculateTrx();
+        }
+
+        function calculateTrx() {
+            const total = currentTrxItems.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+            document.getElementById('trx-total').textContent = formatRp(total);
+
+            const status = document.getElementById('trx-paystatus-val').value;
+            let bayar = parseFloat(document.getElementById('trx-bayar').value) || 0;
+            let sisa = 0;
+            let kembali = 0;
+
+            if(status === 'Belum Lunas') { bayar = 0; sisa = total; }
+            else if (status === 'Lunas') { sisa = 0; kembali = bayar > total ? bayar - total : 0; }
+            else { sisa = total - bayar; if(sisa < 0) { kembali = Math.abs(sisa); sisa = 0; } }
+
+            document.getElementById('trx-sisa').textContent = formatRp(sisa);
+            document.getElementById('trx-kembali').textContent = formatRp(kembali);
+        }
+
+        function saveTransaction() {
+            const pelanggan = document.getElementById('trx-pelanggan').value;
+            if(!pelanggan || currentTrxItems.length === 0) return showToast('Data belum lengkap!', true);
+
+            const total = currentTrxItems.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+            const statusPay = document.getElementById('trx-paystatus-val').value;
+            let bayar = parseFloat(document.getElementById('trx-bayar').value) || 0;
+            if(statusPay === 'Belum Lunas') bayar = 0;
+
+            let sisa = total - bayar;
+            if(sisa < 0) sisa = 0;
+
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+
+            const inputDateVal = document.getElementById('trx-date').value || getTodayStr();
+            let finalDate = localISOTime;
+            if (editingTrxId) {
+                const existingTrx = db.transactions.find(x => x.id === editingTrxId);
+                if (existingTrx && extractDateStr(existingTrx.date) === inputDateVal) {
+                    finalDate = existingTrx.date;
+                } else {
+                    const now = new Date();
+                    const timeStr = now.toTimeString().split(' ')[0];
+                    finalDate = `${inputDateVal}T${timeStr}`;
+                }
+            } else {
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                finalDate = `${inputDateVal}T${timeStr}`;
+            }
+
+            const tData = {
+                id: editingTrxId || genId(),
+                nota: editingTrxId ? (db.transactions.find(x=>x.id==editingTrxId).nota) : `#${Math.floor(Math.random()*10000000)}`,
+                date: finalDate,
+                pelanggan: pelanggan,
+                items: [...currentTrxItems],
+                total: total,
+                dibayar: bayar,
+                sisa: sisa,
+                kembali: bayar > total ? bayar - total : 0,
+                status: document.getElementById('trx-status-val').value,
+                metode: document.getElementById('trx-method-val').value,
+                statusBayar: statusPay
+            };
+
+            if(editingTrxId) {
+                const idx = db.transactions.findIndex(x => x.id === editingTrxId);
+                db.transactions[idx] = tData;
+            } else {
+                db.transactions.unshift(tData);
+            }
+
+            saveLocal();
+            showToast('Transaksi Berhasil Disimpan');
+            resetTrxForm();
+            navTo('dashboard');
+        }
+
+        function deleteTransaction() {
+            if(!editingTrxId) return;
+            const idx = db.transactions.findIndex(x => x.id === editingTrxId);
+            if(idx > -1) {
+                db.transactions[idx].status = 'Batal'; 
+                saveLocal();
+                showToast('Transaksi Dibatalkan');
+                closeModal('modal-detail');
+                resetTrxForm();
+                navTo('dashboard');
+            }
+        }
+
+        function openBayarModal(id) {
+            const t = db.transactions.find(x => x.id === id);
+            if(!t) return;
+            document.getElementById('bayar-trx-id').value = id;
+            document.getElementById('bayar-total').textContent = formatRp(t.total);
+            document.getElementById('bayar-sudah').textContent = formatRp(t.dibayar);
+            document.getElementById('bayar-sisa').textContent = formatRp(t.sisa);
+            
+            setModalBayarStatus('Lunas');
+            document.getElementById('modal-bayar').classList.remove('hidden');
+        }
+
+        function setModalBayarStatus(status) {
+            currentBayarMode = status;
+            const btnLunas = document.getElementById('btn-bayar-lunas');
+            const btnDp = document.getElementById('btn-bayar-dp');
+            const inputContainer = document.getElementById('bayar-input-container');
+            const inputNominal = document.getElementById('bayar-nominal');
+            const tId = document.getElementById('bayar-trx-id').value;
+            const t = db.transactions.find(x => x.id === tId);
+
+            if(status === 'Lunas') {
+                btnLunas.className = "box-3d py-2 text-sm font-bold bg-green-500 text-white shadow-[0_0_0] translate-y-[2px]";
+                btnDp.className = "box-3d py-2 text-sm font-bold text-gray-500";
+                inputContainer.classList.add('hidden');
+                if(t) inputNominal.value = t.sisa; 
+            } else {
+                btnLunas.className = "box-3d py-2 text-sm font-bold text-gray-500";
+                btnDp.className = "box-3d py-2 text-sm font-bold bg-blue-500 text-white shadow-[0_0_0] translate-y-[2px]";
+                inputContainer.classList.remove('hidden');
+                inputNominal.value = '';
+                inputNominal.focus();
+            }
+        }
+
+        function prosesPembayaran() {
+            const id = document.getElementById('bayar-trx-id').value;
+            const t = db.transactions.find(x => x.id === id);
+            if(!t) return;
+
+            let nominalBaru = parseFloat(document.getElementById('bayar-nominal').value) || 0;
+            
+            if(currentBayarMode === 'Lunas') {
+                nominalBaru = t.sisa;
+            }
+
+            if(nominalBaru <= 0) {
+                showToast('Nominal tidak valid atau kosong', true);
+                return;
+            }
+
+            t.dibayar += nominalBaru;
+            t.sisa = t.total - t.dibayar;
+            
+            if(t.sisa <= 0) {
+                t.sisa = 0;
+                t.statusBayar = 'Lunas';
+                t.kembali = t.dibayar > t.total ? t.dibayar - t.total : 0;
+            } else {
+                t.statusBayar = 'DP';
+                t.kembali = 0;
+            }
+
+            saveLocal();
+            
+            const activeFilter = document.querySelector('.job-filter-btn.bg-blue-500');
+            if(activeFilter) renderJobs(activeFilter.textContent.trim());
+            closeModal('modal-bayar');
+            showToast('Pembayaran Berhasil Diperbarui');
+        }
+
+        function openStatusModal(id) {
+            document.getElementById('status-trx-id').value = id;
+            document.getElementById('modal-status').classList.remove('hidden');
+        }
+
+        function updateStatusFromModal(newStatus) {
+            const id = document.getElementById('status-trx-id').value;
+            if(!id) return;
+            closeModal('modal-status');
+            quickUpdateStatus(id, newStatus);
+        }
+
+        function deleteJob(id) {
+            db.transactions = db.transactions.filter(x => x.id !== id);
+            saveLocal();
+            
+            const activeFilter = document.querySelector('.job-filter-btn.bg-blue-500').textContent.trim();
+            renderJobs(activeFilter);
+            showToast('Transaksi Berhasil Dihapus');
+        }
+
+        function renderJobs(filterStatus) {
+            document.querySelectorAll('.job-filter-btn').forEach(btn => {
+                if(btn.textContent.trim() === filterStatus) {
+                    btn.className = "job-filter-btn box-3d px-4 py-2 font-bold bg-blue-500 text-white shadow-[0_0_0] translate-y-[2px]";
+                } else {
+                    btn.className = "job-filter-btn box-3d px-4 py-2 font-bold text-gray-500";
+                }
+            });
+
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = '';
+            
+            const searchInput = document.getElementById('job-search');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            let filtered = db.transactions;
+            
+            if(filterStatus !== 'Semua') {
+                filtered = db.transactions.filter(t => t.status === filterStatus);
+            }
+            
+            if (searchQuery) {
+                filtered = filtered.filter(t => t.pelanggan.toLowerCase().includes(searchQuery));
+            }
+
+            filtered.forEach(t => {
+                const dateStr = new Date(t.date).toLocaleString('id-ID');
+                const statColors = {'Antrian':'bg-blue-100 text-blue-600', 'Proses':'bg-yellow-100 text-yellow-600', 'Siap Ambil':'bg-green-100 text-green-600', 'Selesai':'bg-gray-200 text-gray-700', 'Batal':'bg-red-100 text-red-600'};
+                
+                const belumLunas = Number(t.sisa) > 0;
+
+                const div = document.createElement('div');
+                div.className = 'box-3d p-3';
+                div.id = `job-card-${t.id}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2 border-b pb-2 cursor-pointer" onclick="editTransaction('${t.id}')">
+                        <div>
+                            <div class="font-black text-lg">${t.pelanggan}</div>
+                            <div class="text-xs text-gray-500">${t.nota} | ${dateStr}</div>
+                        </div>
+                        <div class="text-right">
+                            <span id="job-badge-${t.id}" class="text-xs px-2 py-1 rounded font-bold ${statColors[t.status] || 'bg-gray-100'}">${t.status}</span>
+                            <div id="job-paystatus-${t.id}" class="font-bold mt-1 text-sm ${t.statusBayar==='Lunas'?'text-green-500':'text-red-500'}">${t.statusBayar}</div>
+                        </div>
+                    </div>
+                    <div class="text-sm mb-2 text-gray-600 line-clamp-1">${t.items.map(i => `${i.qty}${i.satuan} ${i.nama}`).join(', ')}</div>
+                    <div class="flex gap-2 justify-end flex-wrap" id="job-actions-${t.id}">
+                        ${belumLunas ? `<button onclick="openBayarModal('${t.id}')" class="btn-3d-green px-3 py-1 text-xs"><i class="fa-solid fa-money-bill-wave"></i> Bayar</button>` : ''}
+                        ${t.status !== 'Selesai' && t.status !== 'Batal' ? `<button onclick="openStatusModal('${t.id}')" class="btn-3d px-3 py-1 text-xs"><i class="fa-solid fa-spinner"></i> Proses</button>` : ''}
+                        <button onclick="printNotaBluetooth('${t.id}')" class="btn-3d-white px-2 py-1 text-xs" title="Cetak Nota"><i class="fa-solid fa-print"></i></button>
+                        <button onclick="shareNotaData('${t.id}')" class="btn-3d-white px-2 py-1 text-xs"><i class="fa-solid fa-share-nodes"></i></button>
+                        <button onclick="deleteJob('${t.id}')" class="btn-3d-red px-2 py-1 text-xs" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function quickUpdateStatus(id, newStatus) {
+            const t = db.transactions.find(x => x.id === id);
+            if(!t) return;
+            
+            t.status = newStatus;
+            saveLocal();
+            showToast(`Status jadi ${newStatus}`);
+
+            const currentActiveFilter = document.querySelector('.job-filter-btn.bg-blue-500').textContent.trim();
+
+            if (currentActiveFilter !== 'Semua' && currentActiveFilter !== newStatus) {
+                const card = document.getElementById(`job-card-${id}`);
+                if (card) {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        renderJobs(currentActiveFilter);
+                    }, 500);
+                } else {
+                    renderJobs(currentActiveFilter);
+                }
+            } else {
+                const badge = document.getElementById(`job-badge-${id}`);
+                const actionsContainer = document.getElementById(`job-actions-${id}`);
+                
+                if (badge && actionsContainer) {
+                    const statColors = {'Antrian':'bg-blue-100 text-blue-600', 'Proses':'bg-yellow-100 text-yellow-600', 'Siap Ambil':'bg-green-100 text-green-600', 'Selesai':'bg-gray-200 text-gray-700'};
+                    badge.className = `text-xs px-2 py-1 rounded font-bold ${statColors[newStatus] || 'bg-gray-100'}`;
+                    badge.textContent = newStatus;
+
+                    const belumLunas = Number(t.sisa) > 0;
+
+                    let newActionsHtml = '';
+                    if (belumLunas) {
+                        newActionsHtml += `<button onclick="openBayarModal('${t.id}')" class="btn-3d-green px-3 py-1 text-xs"><i class="fa-solid fa-money-bill-wave"></i> Bayar</button>`;
+                    }
+                    if (newStatus !== 'Selesai' && newStatus !== 'Batal') {
+                        newActionsHtml += `<button onclick="openStatusModal('${t.id}')" class="btn-3d px-3 py-1 text-xs"><i class="fa-solid fa-spinner"></i> Proses</button>`;
+                    }
+                    newActionsHtml += `<button onclick="printNotaBluetooth('${t.id}')" class="btn-3d-white px-2 py-1 text-xs" title="Cetak Nota"><i class="fa-solid fa-print"></i></button>`;
+                    newActionsHtml += `<button onclick="shareNotaData('${t.id}')" class="btn-3d-white px-2 py-1 text-xs"><i class="fa-solid fa-share-nodes"></i></button>`;
+                    newActionsHtml += `<button onclick="deleteJob('${t.id}')" class="btn-3d-red px-2 py-1 text-xs" title="Hapus"><i class="fa-solid fa-trash"></i></button>`;
+
+                    actionsContainer.innerHTML = newActionsHtml;
+                } else {
+                    renderJobs(currentActiveFilter);
+                }
+            }
+        }
+
+        function editTransaction(id) {
+            const t = db.transactions.find(x => x.id === id);
+            if(!t) return;
+            
+            navTo('transaksi');
+            editingTrxId = t.id;
+            document.getElementById('trx-id').value = t.id;
+            document.getElementById('trx-date').value = extractDateStr(t.date);
+            document.getElementById('trx-pelanggan').value = t.pelanggan;
+            currentTrxItems = JSON.parse(JSON.stringify(t.items));
+            
+            setTrxStatus(t.status);
+            setTrxMethod(t.metode);
+            setTrxPayStatus(t.statusBayar);
+            document.getElementById('trx-bayar').value = t.dibayar > 0 ? t.dibayar : '';
+            
+            document.getElementById('btn-hapus-trx').classList.remove('hidden');
+            renderTrxItems();
+        }
+
+        function renderServices() {
+            const c = document.getElementById('services-container');
+            c.innerHTML = '';
+            db.services.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'box-3d p-3 flex justify-between items-center';
+                div.innerHTML = `
+                    <div><div class="font-bold">${s.nama}</div><div class="text-xs text-gray-500">${s.kategori} | ${formatRp(s.harga)}/${s.satuan}</div></div>
+                    <div class="flex gap-2">
+                        <button onclick="editService('${s.id}')" class="text-blue-500" title="Edit Layanan"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="deleteData('services', '${s.id}')" class="text-red-500" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                c.appendChild(div);
+            });
+        }
+
+        function openServiceForm() {
+            document.getElementById('service-form').classList.remove('hidden');
+            document.getElementById('srv-id').value = '';
+            ['nama','estimasi','min','harga'].forEach(id => document.getElementById('srv-'+id).value = '');
+        }
+
+        function editService(id) {
+            const srv = db.services.find(x => x.id === id);
+            if (!srv) return;
+            
+            document.getElementById('service-form').classList.remove('hidden');
+            
+            document.getElementById('srv-id').value = srv.id;
+            document.getElementById('srv-nama').value = srv.nama;
+            document.getElementById('srv-kategori').value = srv.kategori;
+            document.getElementById('srv-satuan').value = srv.satuan;
+            document.getElementById('srv-estimasi').value = srv.estimasi || '';
+            document.getElementById('srv-min').value = srv.min || 1;
+            document.getElementById('srv-harga').value = srv.harga || 0;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('srv-nama').focus();
+        }
+
+        function saveService() {
+            const id = document.getElementById('srv-id').value || genId();
+            const srv = {
+                id: id,
+                nama: document.getElementById('srv-nama').value,
+                kategori: document.getElementById('srv-kategori').value,
+                satuan: document.getElementById('srv-satuan').value,
+                estimasi: document.getElementById('srv-estimasi').value,
+                min: parseFloat(document.getElementById('srv-min').value) || 1,
+                harga: parseFloat(document.getElementById('srv-harga').value) || 0
+            };
+            if(!srv.nama) return;
+
+            const idx = db.services.findIndex(x => x.id === id);
+            if(idx > -1) db.services[idx] = srv; else db.services.push(srv);
+            saveLocal(); renderServices(); document.getElementById('service-form').classList.add('hidden');
+        }
+
+        function renderCustomers() {
+            const c = document.getElementById('customers-container');
+            const search = document.getElementById('cust-search').value.toLowerCase();
+            c.innerHTML = '';
+            db.customers.filter(x => x.nama.toLowerCase().includes(search)).forEach(cust => {
+                const div = document.createElement('div');
+                div.className = 'box-3d p-3 flex justify-between items-center';
+                div.innerHTML = `
+                    <div><div class="font-bold">${cust.nama}</div><div class="text-xs text-gray-500">${cust.tlp || '-'}</div></div>
+                    <div class="flex gap-2">
+                        <button onclick="showCustomerDetail('${cust.nama}')" class="text-green-500" title="Detail Trx"><i class="fa-solid fa-list"></i></button>
+                        <button onclick="editCustomer('${cust.id}')" class="text-blue-500" title="Edit Pelanggan"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="deleteData('customers', '${cust.id}')" class="text-red-500" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                c.appendChild(div);
+            });
+        }
+
+        function openCustomerForm() {
+            document.getElementById('customer-form').classList.remove('hidden');
+            document.getElementById('cust-id').value = '';
+            document.getElementById('cust-nama').value = '';
+            document.getElementById('cust-tlp').value = '';
+        }
+
+        function editCustomer(id) {
+            const cust = db.customers.find(x => x.id === id);
+            if (!cust) return;
+            
+            document.getElementById('customer-form').classList.remove('hidden');
+            
+            document.getElementById('cust-id').value = cust.id;
+            document.getElementById('cust-nama').value = cust.nama;
+            document.getElementById('cust-tlp').value = cust.tlp || '';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('cust-nama').focus();
+        }
+
+        function saveCustomer() {
+            const id = document.getElementById('cust-id').value || genId();
+            const cust = { id: id, nama: document.getElementById('cust-nama').value, tlp: document.getElementById('cust-tlp').value };
+            if(!cust.nama) return;
+            const idx = db.customers.findIndex(x => x.id === id);
+            if(idx > -1) db.customers[idx] = cust; else db.customers.push(cust);
+            saveLocal(); renderCustomers(); document.getElementById('customer-form').classList.add('hidden');
+        }
+
+        async function importContact() {
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const contacts = await navigator.contacts.select(['name', 'tel'], {multiple: true});
+                    contacts.forEach(c => {
+                        db.customers.push({id: genId(), nama: c.name[0], tlp: c.tel ? c.tel[0] : ''});
+                    });
+                    saveLocal(); renderCustomers(); showToast('Kontak diimpor');
+                } catch(e) { showToast('Gagal impor kontak', true); }
+            } else { showToast('Browser tidak mendukung Web Contact API', true); }
+        }
+
+        function deleteData(table, id) {
+            db[table] = db[table].filter(x => x.id !== id);
+            saveLocal();
+            if(table === 'services') renderServices(); else renderCustomers();
+        }
+
+        function generateReports() {
+            const tglDari = document.getElementById('lap-tgl-dari').value;
+            const tglSd = document.getElementById('lap-tgl-sd').value;
+            const metode = document.getElementById('lap-metode').value;
+            const status = document.getElementById('lap-status').value;
+
+            let totalOmset = 0, totalMasuk = 0, totalLunas = 0, totalPiutang = 0;
+
+            db.transactions.forEach(t => {
+                const tDate = extractDateStr(t.date);
+                if(tDate >= tglDari && tDate <= tglSd) {
+                    if(metode !== 'Semua' && t.metode !== metode) return;
+                    if(status !== 'Semua' && t.statusBayar !== status) return;
+
+                    if(t.status === 'Batal') {
+                        return;
+                    }
+
+                    totalMasuk += Number(t.total);
+                    totalOmset += Number(t.dibayar);
+                    totalPiutang += Number(t.sisa);
+                    if(t.statusBayar === 'Lunas') totalLunas += Number(t.total);
+                }
+            });
+
+            document.getElementById('lap-val-omset').textContent = formatRp(totalOmset);
+            document.getElementById('lap-val-masuk').textContent = formatRp(totalMasuk);
+            document.getElementById('lap-val-lunas').textContent = formatRp(totalLunas);
+            document.getElementById('lap-val-piutang').textContent = formatRp(totalPiutang);
+        }
+
+        function showReportDetail(type) {
+            const tglDari = document.getElementById('lap-tgl-dari').value;
+            const tglSd = document.getElementById('lap-tgl-sd').value;
+            
+            let filtered = db.transactions.filter(t => {
+                const d = extractDateStr(t.date);
+                return d >= tglDari && d <= tglSd;
+            });
+
+            if(type === 'Batal') filtered = filtered.filter(t => t.status === 'Batal');
+            else {
+                filtered = filtered.filter(t => t.status !== 'Batal');
+                if(type === 'Lunas') filtered = filtered.filter(t => t.statusBayar === 'Lunas');
+                if(type === 'Piutang') filtered = filtered.filter(t => t.sisa > 0);
+            }
+
+            document.getElementById('modal-detail-title').textContent = `Detail Laporan: ${type}`;
+            let html = '';
+            if(filtered.length === 0) html += `<div class="text-center text-gray-500 py-4">Tidak ada data</div>`;
+            
+            filtered.forEach(t => {
+                html += `
+                    <div class="border-b border-gray-200 py-2 cursor-pointer hover:bg-blue-50" onclick="editTransaction('${t.id}'); closeModal('modal-detail')">
+                        <div class="flex justify-between font-bold text-blue-700"><span>${t.pelanggan}</span> <span>${formatRp(t.total)}</span></div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>${t.nota} | ${new Date(t.date).toLocaleDateString('id-ID')}</span>
+                            <span class="${t.sisa>0?'text-red-500':''}">${t.statusBayar} (Sisa: ${formatRp(t.sisa)})</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('modal-detail-content').innerHTML = html;
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function showCustomerDetail(nama) {
+            const trxs = db.transactions.filter(t => t.pelanggan === nama && t.status !== 'Batal');
+            let total = 0, lunas = 0, piutang = 0;
+            
+            let listHtml = '';
+            trxs.forEach(t => {
+                total += Number(t.total);
+                piutang += Number(t.sisa);
+                lunas += Number(t.dibayar);
+                listHtml += `
+                    <div class="border-b py-2 text-xs">
+                        <div class="flex justify-between font-bold"><span>${new Date(t.date).toLocaleDateString('id-ID')}</span> <span>${formatRp(t.total)}</span></div>
+                        <div class="flex justify-between text-gray-500"><span>${t.statusBayar}</span> <span class="text-red-500">Sisa: ${formatRp(t.sisa)}</span></div>
+                    </div>`;
+            });
+
+            document.getElementById('modal-detail-title').textContent = `Detail Pelanggan: ${nama}`;
+            const html = `
+                <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                    <div class="bg-blue-50 p-2 rounded">
+                        <div class="text-[10px] text-gray-500">Total Trx</div>
+                        <div class="font-bold text-blue-600 text-xs">${formatRp(total)}</div>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded">
+                        <div class="text-[10px] text-gray-500">Telah Bayar</div>
+                        <div class="font-bold text-green-600 text-xs">${formatRp(lunas)}</div>
+                    </div>
+                    <div class="bg-red-50 p-2 rounded">
+                        <div class="text-[10px] text-gray-500">Sisa Piutang</div>
+                        <div class="font-bold text-red-600 text-xs">${formatRp(piutang)}</div>
+                    </div>
+                </div>
+                <div class="max-h-60 overflow-y-auto">${listHtml}</div>
+            `;
+            document.getElementById('modal-detail-content').innerHTML = html;
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function initSettingsForm() {
+            document.getElementById('set-nama').value = db.settings.nama;
+            document.getElementById('set-alamat').value = db.settings.alamat;
+            document.getElementById('set-tlp').value = db.settings.tlp;
+            document.getElementById('set-footer').value = db.settings.footer;
+            document.getElementById('set-cloud-url').value = db.settings.cloudUrl;
+            
+            document.getElementById('set-marquee-color').value = db.settings.marqueeColor || '#1d4ed8';
+            document.getElementById('set-marquee-speed').value = db.settings.marqueeSpeed || 15;
+            document.getElementById('speed-val').textContent = (db.settings.marqueeSpeed || 15) + 's';
+
+            Object.keys(db.settings.chk).forEach(k => {
+                const el = document.getElementById('chk-'+k);
+                if(el) el.checked = db.settings.chk[k];
+            });
+        }
+
+        function saveOutletInfo() {
+            saveSettings();
+            showToast('Informasi Outlet Berhasil Disimpan!');
+        }
+
+        function saveSettings() {
+            db.settings.nama = document.getElementById('set-nama').value;
+            db.settings.alamat = document.getElementById('set-alamat').value;
+            db.settings.tlp = document.getElementById('set-tlp').value;
+            db.settings.footer = document.getElementById('set-footer').value;
+            db.settings.cloudUrl = document.getElementById('set-cloud-url').value;
+            
+            db.settings.marqueeColor = document.getElementById('set-marquee-color').value;
+            db.settings.marqueeSpeed = document.getElementById('set-marquee-speed').value;
+            document.getElementById('speed-val').textContent = db.settings.marqueeSpeed + 's';
+
+            Object.keys(db.settings.chk).forEach(k => {
+                const el = document.getElementById('chk-'+k);
+                if(el) db.settings.chk[k] = el.checked;
+            });
+            saveLocal();
+            updateHeaderDisplay();
+        }
+
+        function updateHeaderDisplay() {
+            const headerName = document.getElementById('header-outlet-name');
+            if (headerName) {
+                headerName.textContent = db.settings.nama || 'LAUNDRY KU 3D';
+                headerName.style.color = db.settings.marqueeColor || '#1d4ed8';
+                headerName.style.animationDuration = (db.settings.marqueeSpeed || 15) + 's';
+            }
+        }
+
+        function copyScript() {
+            const input = document.getElementById('script-code');
+            input.select();
+            document.execCommand('copy');
+            showToast('Script disalin!');
+        }
+
+        function setSyncStatus(color) {
+            const ind = document.getElementById('sync-indicator');
+            ind.className = `w-3 h-3 rounded-full shadow-[0_0_5px_currentColor] ${color === 'green' ? 'bg-green-500 text-green-500' : color === 'yellow' ? 'bg-yellow-500 text-yellow-500' : 'bg-red-500 text-red-500'}`;
+        }
+
+        async function testCloudConnection() {
+            const url = db.settings.cloudUrl;
+            if(!url) return showToast('URL Cloud kosong', true);
+            setSyncStatus('yellow');
+            try {
+                const res = await fetch(url);
+                await res.json();
+                setSyncStatus('green'); showToast('Koneksi Berhasil');
+            } catch(e) { setSyncStatus('red'); showToast('Koneksi Gagal/URL Salah', true); }
+        }
+
+        async function uploadToCloud() {
+            const url = db.settings.cloudUrl;
+            if(!url) return;
+            setSyncStatus('yellow');
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(db)
+                });
+                setSyncStatus('green');
+                showToast('Unggah Berhasil');
+            } catch(e) { setSyncStatus('red'); showToast('Gagal Mengunggah', true); }
+        }
+
+        async function downloadFromCloud(silent = false) {
+            const url = db.settings.cloudUrl;
+            if(!url) return;
+            setSyncStatus('yellow');
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if(data && data.transactions) {
+                    db = data;
+                    localStorage.setItem('laundry_db', JSON.stringify(db));
+                    initSettingsForm();
+                    setSyncStatus('green');
+                    
+                    if(!silent) {
+                        showToast('Data Berhasil Ditarik');
+                        navTo('dashboard');
+                    } else {
+                        if(document.getElementById('view-dashboard').classList.contains('hidden') === false) renderDashboard();
+                    }
+                }
+            } catch(e) { 
+                setSyncStatus('red'); 
+                if(!silent) showToast('Gagal Menarik Data (Cek URL)', true); 
+            }
+        }
+
+        function backgroundSync() {
+            const url = db.settings.cloudUrl;
+            if(!url) return;
+            setSyncStatus('yellow');
+            fetch(url, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'}, body: JSON.stringify(db) })
+                .then(() => setSyncStatus('green'))
+                .catch(() => setSyncStatus('red'));
+        }
+
+        function exportExcel() {
+            let csv = 'Tanggal,Nota,Pelanggan,Total,Dibayar,Sisa,Status,Bayar\n';
+            db.transactions.forEach(t => {
+                csv += `${new Date(t.date).toLocaleDateString('id-ID')},${t.nota},${t.pelanggan},${t.total},${t.dibayar},${t.sisa},${t.status},${t.statusBayar}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'Laporan_Laundry.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function resetDataModal() {
+            const content = document.getElementById('modal-detail-content');
+            content.innerHTML = `
+                <p class="text-sm text-gray-600 mb-3">Apakah Anda yakin ingin menghapus seluruh data transaksi dan aplikasi ini?</p>
+                <div class="flex gap-2">
+                    <button onclick="localStorage.removeItem('laundry_db'); location.reload();" class="btn-3d-red py-2 flex-1">Ya, Reset Semua</button>
+                    <button onclick="closeModal('modal-detail')" class="btn-3d-white py-2 flex-1">Batal</button>
+                </div>
+            `;
+            document.getElementById('modal-detail-title').textContent = 'Konfirmasi Reset Data';
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function generateNotaString(trx) {
+            const s = db.settings;
+            const chk = s.chk;
+            
+            let out = "";
+            if(chk.nama) out += `${s.nama}\n`;
+            if(chk.alamat) out += `${s.alamat}\n`;
+            if(chk.tlp) out += `${s.tlp}\n`;
+            out += `--------------------------------\n`;
+            out += `Nota.   : ${trx.nota}\n`;
+            out += `Tgl     : ${new Date(trx.date).toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}\n`;
+            
+            let maxMs = 0;
+            if(trx.items && trx.items.length > 0) {
+                trx.items.forEach(item => {
+                    if(item.estimasi) {
+                        const estStr = item.estimasi.toLowerCase();
+                        const match = estStr.match(/(\d+)/);
+                        if(match) {
+                            let val = parseInt(match[0]);
+                            let ms = 0;
+                            if (estStr.includes('jam')) {
+                                ms = val * 60 * 60 * 1000;
+                            } else if (estStr.includes('minggu')) {
+                                ms = val * 7 * 24 * 60 * 60 * 1000;
+                            } else if (estStr.includes('bulan')) {
+                                ms = val * 30 * 24 * 60 * 60 * 1000;
+                            } else {
+                                ms = val * 24 * 60 * 60 * 1000;
+                            }
+                            if(ms > maxMs) maxMs = ms;
+                        }
+                    }
+                });
+            }
+            
+            if (maxMs > 0) {
+                const selesaiDate = new Date(new Date(trx.date).getTime() + maxMs);
+                out += `Selesai : ${selesaiDate.toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}\n`;
+            } else {
+                out += `Selesai : -\n`;
+            }
+
+            out += `Plg     : ${trx.pelanggan}\n`;
+            if(chk.kasir) out += `Ksr.    : Admin\n`;
+            out += `================================\n`;
+            
+            if(chk.layanan) {
+                trx.items.forEach(i => {
+                    out += `${i.nama}\n`;
+                    out += `  ${i.qty} x ${formatRp(i.harga)} = ${formatRp(i.qty * i.harga)}\n`;
+                });
+            }
+            out += `--------------------------------\n`;
+            out += `TOTAL       : ${formatRp(trx.total)}\n`;
+            
+            if(chk.detail) {
+                out += `T'LAH DIBAYAR: ${formatRp(trx.dibayar)}\n`;
+                if(trx.kembali > 0) out += `KEMBALIAN   : ${formatRp(trx.kembali)}\n`;
+                out += `SISA TAGIHAN: ${formatRp(trx.sisa)}\n`;
+                out += `STATUS      : ${trx.statusBayar}\n`;
+                out += `--------------------------------\n`;
+            }
+            
+            if(s.footer) {
+                out += `${s.footer}\n`;
+            }
+            out += `\n\n\n`;
+            return out;
+        }
+
+        function previewNota() {
+            let trx = db.transactions[0];
+            if(!trx) {
+                trx = {
+                    nota: '#PREVIEW123',
+                    date: new Date().toISOString(),
+                    pelanggan: 'Pelanggan Test',
+                    items: [{nama: 'Cuci Komplit', qty: 2, satuan: 'kg', harga: 6000}],
+                    total: 12000, dibayar: 12000, sisa: 0, kembali: 0, statusBayar: 'Lunas'
+                };
+            }
+            const text = generateNotaString(trx);
+            const content = document.getElementById('modal-detail-content');
+            content.innerHTML = `<pre class="text-xs bg-gray-100 p-3 rounded-lg border border-gray-300 font-mono whitespace-pre-wrap overflow-x-auto">${text}</pre>`;
+            document.getElementById('modal-detail-title').textContent = 'Preview Struk Nota';
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        async function printNotaBluetooth(id = null) {
+            let trx = null;
+            if(id) trx = db.transactions.find(x => x.id === id);
+            else if(editingTrxId) trx = db.transactions.find(x => x.id === editingTrxId);
+            else if(db.transactions.length > 0) trx = db.transactions[0];
+            
+            if(!trx) return showToast('Tidak ada transaksi untuk diprint', true);
+            
+            currentPrintString = generateNotaString(trx);
+
+            if(bluetoothDevice && bluetoothDevice.gatt.connected && bluetoothCharacteristic) {
+                sendToThermalPrinter(currentPrintString);
+            } else {
+                updateBTModalUI();
+                document.getElementById('modal-bluetooth').classList.remove('hidden');
+            }
+        }
+
+        function updateBTModalUI() {
+            const isConnected = bluetoothDevice && bluetoothDevice.gatt.connected;
+            const actionArea = document.getElementById('bt-action-area');
+            
+            if (isConnected) {
+                actionArea.innerHTML = `
+                    <button onclick="sendToThermalPrinter(currentPrintString)" class="btn-3d w-full py-3"><i class="fa-solid fa-print"></i> Cetak ke ${bluetoothDevice.name || 'Printer Bluetooth'}</button>
+                    <button onclick="disconnectPrinter()" class="btn-3d-red w-full py-2 text-xs"><i class="fa-solid fa-plug-circle-xmark"></i> Putuskan Bluetooth</button>
+                    <button onclick="doSystemPrint()" class="btn-3d-white w-full py-2 text-xs"><i class="fa-solid fa-file-pdf"></i> Cetak via System / PDF</button>
+                `;
+            } else {
+                actionArea.innerHTML = `
+                    <button onclick="connectAndPrint()" class="btn-3d w-full py-3"><i class="fa-brands fa-bluetooth-b"></i> Cari & Cetak Printer Bluetooth</button>
+                    <button onclick="doSystemPrint()" class="btn-3d-white w-full py-2 text-xs"><i class="fa-solid fa-print"></i> Cetak via System Browser / PDF</button>
+                `;
+            }
+        }
+
+        async function connectAndPrint() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: PRINTER_SERVICES
+                });
+                
+                bluetoothDevice = device;
+                bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+                
+                showToast('Menghubungkan ke ' + device.name + '...');
+                const server = await device.gatt.connect();
+                
+                let service = null;
+                for (const serviceUuid of PRINTER_SERVICES) {
+                    try {
+                        service = await server.getPrimaryService(serviceUuid);
+                        if (service) break;
+                    } catch (e) {}
+                }
+                
+                if (!service) {
+                    throw new Error('Service printer tidak ditemukan');
+                }
+                
+                const characteristics = await service.getCharacteristics();
+                bluetoothCharacteristic = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                
+                if (!bluetoothCharacteristic) {
+                    throw new Error('Karakteristik print tidak ditemukan');
+                }
+                
+                document.getElementById('bt-indicator-wrap').classList.remove('hidden');
+                document.getElementById('bt-indicator-wrap').classList.add('flex');
+                
+                updateBTModalUI();
+                sendToThermalPrinter(currentPrintString);
+            } catch (error) {
+                console.error(error);
+                showToast('Gagal terhubung: ' + error.message, true);
+            }
+        }
+
+        async function sendToThermalPrinter(text) {
+            if (!bluetoothCharacteristic) {
+                showToast('Printer belum terhubung', true);
+                return;
+            }
+            try {
+                const encoder = new TextEncoder();
+                const initCmd = new Uint8Array([0x1B, 0x40]);
+                await bluetoothCharacteristic.writeValue(initCmd);
+
+                const data = encoder.encode(text);
+                const chunkSize = 100;
+                for (let i = 0; i < data.length; i += chunkSize) {
+                    const chunk = data.slice(i, i + chunkSize);
+                    await bluetoothCharacteristic.writeValue(chunk);
+                }
+                
+                showToast('Nota berhasil dikirim ke printer!');
+                closeModal('modal-bluetooth');
+            } catch (error) {
+                console.error(error);
+                showToast('Gagal mencetak: ' + error.message, true);
+            }
+        }
+
+        function onDisconnected() {
+            document.getElementById('bt-indicator-wrap').classList.add('hidden');
+            document.getElementById('bt-indicator-wrap').classList.remove('flex');
+            bluetoothDevice = null;
+            bluetoothCharacteristic = null;
+            showToast('Koneksi Bluetooth terputus');
+            updateBTModalUI();
+        }
+
+        function confirmDisconnectPrinter() {
+            if (confirm('Apakah Anda ingin memutuskan koneksi printer Bluetooth?')) {
+                disconnectPrinter();
+            }
+        }
+
+        function disconnectPrinter() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+            }
+            onDisconnected();
+        }
+
+        function doSystemPrint() {
+            closeModal('modal-bluetooth');
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `<pre style="font-family: monospace; white-space: pre-wrap; padding: 20px;">${currentPrintString}</pre>`;
+            window.print();
+        }
+
+        function shareNota() {
+            let trx = null;
+            if (editingTrxId) trx = db.transactions.find(x => x.id === editingTrxId);
+            else if (db.transactions.length > 0) trx = db.transactions[0];
+            if (trx) shareNotaData(trx.id);
+            else showToast('Tidak ada transaksi untuk dibagikan', true);
+        }
+
+        function shareNotaData(id) {
+            const trx = db.transactions.find(x => x.id === id);
+            if (!trx) return;
+            const text = generateNotaString(trx);
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Nota ' + trx.nota,
+                    text: text
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(text);
+                showToast('Nota disalin ke clipboard');
+            }
+        }
+    </script>
+</body>
+</html>
